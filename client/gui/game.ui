@@ -1,0 +1,255 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1253</width>
+    <height>884</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>MainWindow</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <widget class="QPlainTextEdit" name="text_log">
+    <property name="geometry">
+     <rect>
+      <x>40</x>
+      <y>80</y>
+      <width>301</width>
+      <height>431</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QLabel" name="enemy_pic_1">
+    <property name="geometry">
+     <rect>
+      <x>550</x>
+      <y>110</y>
+      <width>100</width>
+      <height>80</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>TextLabel</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="enemy_pic_2">
+    <property name="geometry">
+     <rect>
+      <x>710</x>
+      <y>110</y>
+      <width>100</width>
+      <height>80</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>TextLabel</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="enemy_pic_3">
+    <property name="geometry">
+     <rect>
+      <x>870</x>
+      <y>110</y>
+      <width>100</width>
+      <height>80</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>TextLabel</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="team_pic_1">
+    <property name="geometry">
+     <rect>
+      <x>550</x>
+      <y>220</y>
+      <width>100</width>
+      <height>80</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>TextLabel</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="team_pic_2">
+    <property name="geometry">
+     <rect>
+      <x>710</x>
+      <y>220</y>
+      <width>100</width>
+      <height>80</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>TextLabel</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="team_pic_3">
+    <property name="geometry">
+     <rect>
+      <x>870</x>
+      <y>220</y>
+      <width>100</width>
+      <height>80</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>TextLabel</string>
+    </property>
+   </widget>
+   <widget class="QProgressBar" name="hp_bar">
+    <property name="geometry">
+     <rect>
+      <x>640</x>
+      <y>410</y>
+      <width>321</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <property name="value">
+     <number>100</number>
+    </property>
+   </widget>
+   <widget class="QProgressBar" name="mana_bar">
+    <property name="geometry">
+     <rect>
+      <x>640</x>
+      <y>460</y>
+      <width>321</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <property name="value">
+     <number>100</number>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label">
+    <property name="geometry">
+     <rect>
+      <x>540</x>
+      <y>410</y>
+      <width>91</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Health Points</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_2">
+    <property name="geometry">
+     <rect>
+      <x>540</x>
+      <y>470</y>
+      <width>81</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>mana</string>
+    </property>
+   </widget>
+   <widget class="QListWidget" name="item_list">
+    <property name="geometry">
+     <rect>
+      <x>70</x>
+      <y>570</y>
+      <width>256</width>
+      <height>192</height>
+     </rect>
+    </property>
+    <item>
+     <property name="text">
+      <string>This is for items</string>
+     </property>
+    </item>
+   </widget>
+   <widget class="QPushButton" name="action_button">
+    <property name="geometry">
+     <rect>
+      <x>620</x>
+      <y>640</y>
+      <width>121</width>
+      <height>61</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Action</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="mystery_button">
+    <property name="geometry">
+     <rect>
+      <x>810</x>
+      <y>640</y>
+      <width>121</width>
+      <height>61</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Dont know what this is</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="end_turn_button">
+    <property name="geometry">
+     <rect>
+      <x>620</x>
+      <y>720</y>
+      <width>311</width>
+      <height>91</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>End Turn</string>
+    </property>
+   </widget>
+   <widget class="QLCDNumber" name="lcdNumber">
+    <property name="geometry">
+     <rect>
+      <x>660</x>
+      <y>580</y>
+      <width>81</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <property name="smallDecimalPoint">
+     <bool>false</bool>
+    </property>
+    <property name="value" stdset="0">
+     <double>500.000000000000000</double>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_3">
+    <property name="geometry">
+     <rect>
+      <x>580</x>
+      <y>580</y>
+      <width>71</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>AP points</string>
+    </property>
+   </widget>
+  </widget>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>1253</width>
+     <height>21</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
