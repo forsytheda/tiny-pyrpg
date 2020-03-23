@@ -52,7 +52,7 @@ class Profession:
         # TBD
         self.actions = {}
 
-        self.actions["attack"] = Action("Basic Attack", 0, 3, [Modifier("hp", random.randint(0, 10) + self.attributes["attack_offset"])])
+        self.actions["attack"] = Action("Basic Attack", 0, 3, [Modifier("hp", -(random.randint(0, 10) + self.attributes["attack_offset"]))])
     
     # Stores the player that owns this profession instance
     def set_player(self, player):
@@ -68,49 +68,42 @@ class Fighter(Profession):
     def __init__(self):
         super().__init__()
 
-        self.attack_offset = 2
-        self.defense_offset = 1
-
-        self.health_offset = 20
+        self.attributes["attack_offset"] = 2
+        self.attributes["defense_offset"] = 1
+        self.attributes["health_offset"] = 20
         self.init_stats()
 
-        self.actions["protect"] = self.protect
-    
-    def protect(self):
-        return random.randint(1, 5) + self.defense_offset
+        self.actions["protect"] = Action("Protect", 0, 2, [Modifier("defense_offset", random.randint(1, 5) + self.attributes["defense_offset"], 1)])
 
 class Rogue(Profession):
     def __init__(self):
         super().__init__()
 
-        self.attack_offset = 3
-
-        self.heal_offset = -5
-        self.mana_offset = 25
+        self.attributes["attack_offset"] = 3
+        self.attributes["heal_offset"] = -5
+        self.attributes["mana_offset"] = 25
         self.init_stats()
 
-        self.actions["sneak"] = self.sneak
-
-    def sneak(self):
-        self.temp_defense = 5
+        self.actions["sneak"] = Action("Sneak", 0, 2, [Modifier("defense_offset", 10, 5, 0, True)])
 
 class Cleric(Profession):
     def __init__(self):
         super().__init__()
 
-        self.defense_offset = 1
-        self.heal_offset = 2
-
-        self.mana_offset = 10
+        self.attributes["defense_offset"] = 1
+        self.attributes["heal_offset"] = 2
+        self.attributes["mana_offset"] = 10
         self.init_stats()
 
-        self.actions["heal"] = self.heal
-
-    def heal(self):
-        return random.randint(1,5) + self.heal_offset
+        self.actions["heal"] = Action("Basic Heal", 5, 3, [Modifier("hp", -(random.randint(1,5) + self.attributes["heal_offset"]))])
 
 class Wizard(Profession):
     def __init__(self):
         super().__init__()
+        self.attributes["attack_offest"] = 5
+        self.attributes["defense_offset"] = -5
+        self.attributes["mana_offset"] = 50
+        self.attributes["health_offset"] = -20
+        self.init_stats()
 
-        self.mana_offset = 50
+        self.actions["fireball"] = Action("Fireball", 5, 3, [Modifier("hp", random.randint(4, 10) + self.attributes["attack_offset"])])

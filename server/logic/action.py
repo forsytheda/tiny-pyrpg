@@ -5,23 +5,6 @@ class Action:
         self.ap_cost = ap_cost
         self.modifiers = modifiers
 
-    def apply(self, source, target):
-        if source.attributes["mana"] - self.mana_cost < 0:
-            raise ManaError(source, source.attributes["mana"] - self.mana_cost)
-        elif source.attribute["ap"] - self.ap_cost < 0:
-            pass # Throw ap error
-        else:
-            for mod in self.modifiers:
-                if mod.attribute not in target.attributes:
-                    raise ActionError(source, target, mod.attribute)
-            for mod in self.modifiers:
-                if mod.target_self:
-                    source.attributes[mod.attribute] += mod.delta
-                else:
-                    target.attribute[mod.attribute] += mod.delta
-            source.modifers["mana"] -= self.mana_cost
-            source.modifers["ap"] -= self.ap_cost
-
 class Modifier:
     def __init__(self, attribute, delta, duration=1, duration_delta=0, target_self=False):
         self.attribute = attribute
@@ -44,6 +27,14 @@ class ManaError(Exception):
         self.source = source
         self.delta = delta
 
+    def print_error(self):
+        print("ERROR: Action Error | {0} tried to use an action using {1} mana but only had {2}.".format(self.source.player.name, self.delta, self.source.attributes["mana"]))
+
 class APError(Exception):
-    def __init__(self):
-        pass
+    def __init__(self, source, delta):
+        self.source = source
+        self.delta = delta
+
+    def print_error(self):
+        print("ERROR: Action Error | {0} tried to use an action using {1} AP but only had {2}.".format(self.source.player.name, self.delta, self.source.attributes["ap"]))
+        
