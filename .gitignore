@@ -1,2 +1,4 @@
 .venv
 .vscode
+.pylintrc
+__pycache__
