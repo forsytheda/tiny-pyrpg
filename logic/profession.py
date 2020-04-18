@@ -1,5 +1,3 @@
-import os, json
-    
 PROFESSION_LIST = {}
 
 class Profession:

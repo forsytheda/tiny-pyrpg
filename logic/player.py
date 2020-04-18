@@ -1,4 +1,5 @@
-from ..game.profession import PROFESSION_LIST
+from .profession import PROFESSION_LIST
+import json
 
 class Player:
     def __init__(self, number, name):
