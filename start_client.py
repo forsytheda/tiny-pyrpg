@@ -11,15 +11,15 @@ class Client:
         self.window = None
 
     def show(self):
-        if self.window not None:
+        if not self.window == None:
             self.window.show()
 
     def load_main_menu(self):
         self.window = MainMenu()
-        self.join_game_button = (QPushButton) self.window.findChild(QPushButton, 'btn_join_game')
-        self.host_game_button = (QPushButton) self.window.findChild(QPushButton, 'btn_host_game')
-        self.txt_username = (QLineEdit) self.window.findChild(QLineEdit, 'txt_username')
-        self.txt_ip = (QLineEdit) self.window.findChild(QLineEdit, 'txt_ip_address')
+        self.join_game_button = self.window.findChild(QPushButton, 'btn_join_game')
+        self.host_game_button = self.window.findChild(QPushButton, 'btn_host_game')
+        self.txt_username = self.window.findChild(QLineEdit, 'txt_username')
+        self.txt_ip = self.window.findChild(QLineEdit, 'txt_ip_address')
 
     def load_lobby_menu(self):
         self.window = LobbyMenu()
