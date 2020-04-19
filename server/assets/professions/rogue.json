@@ -1,0 +1,22 @@
+{
+    "TPR-Type": "profession",
+    "name": "Rogue",
+    "description": "A sneaky silhouette cloaked in shadows and mystery.",
+    "base_attributes": {
+        "base_hp": 80,
+        "base_ap": 6,
+        "base_mana": 30,
+        "offset_attack": 4,
+        "offset_defense": 5,
+        "offset_recover_hp": 5,
+        "offset_recover_mana": 10
+    },
+    "actions": [
+        "basic_attack",
+        "basic_defend",
+        "basic_rest",
+        "sneak_attack",
+        "hide",
+        "poison"
+    ]
+}
