@@ -75,6 +75,8 @@ class Ui_TPRMainMenu(object):
 
         self.retranslateUi(TPRMainMenu)
         QtCore.QMetaObject.connectSlotsByName(TPRMainMenu)
+        TPRMainMenu.setTabOrder(self.txt_username, self.txt_ip_address)
+        TPRMainMenu.setTabOrder(self.txt_ip_address, self.btn_join_game)
 
     def retranslateUi(self, TPRMainMenu):
         _translate = QtCore.QCoreApplication.translate

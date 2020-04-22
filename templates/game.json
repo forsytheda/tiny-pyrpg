@@ -1,0 +1,52 @@
+{
+    "game":
+    {
+        "lobby":
+        {
+            "p1":
+            {
+                "name": "PLAYER NAME ",
+                "profession": "PROFESSION",
+                "profession_dsc": "A QUITE LONG PROFESSION SPECIFIC DESCRIPTION",
+                "ready": false
+            },
+            "p2":
+            {
+                "name": "PLAYER NAME ",
+                "profession": "PROFESSION",
+                "profession_dsc": "A QUITE LONG PROFESSION SPECIFIC DESCRIPTION",
+                "ready": false
+            },
+            "p3":
+            {
+                "name": "PLAYER NAME ",
+                "profession": "PROFESSION",
+                "profession_dsc": "A QUITE LONG PROFESSION SPECIFIC DESCRIPTION",
+                "ready": false
+            },
+            "p4":
+            {
+                "name": "PLAYER NAME ",
+                "profession": "PROFESSION",
+                "profession_dsc": "A QUITE LONG PROFESSION SPECIFIC DESCRIPTION",
+                "ready": false
+            },
+            "p5":
+            {
+                "name": "PLAYER NAME ",
+                "profession": "PROFESSION",
+                "profession_dsc": "A QUITE LONG PROFESSION SPECIFIC DESCRIPTION",
+                "ready": false
+            },
+            "p6":
+            {
+                "name": "PLAYER NAME ",
+                "profession": "PROFESSION",
+                "profession_dsc": "A QUITE LONG PROFESSION SPECIFIC DESCRIPTION",
+                "ready": false
+            }
+        },
+        "in_progress": true,
+        "turn_number": 0
+    }
+}

@@ -167,6 +167,11 @@
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
  </widget>
+ <tabstops>
+  <tabstop>txt_username</tabstop>
+  <tabstop>txt_ip_address</tabstop>
+  <tabstop>btn_join_game</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

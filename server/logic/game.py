@@ -9,22 +9,28 @@ class Game:
         self.initializer = Initializer()
         self.initializer.init()
         self.lobby = Lobby()
+        self.lobby_lock = threading.Lock()
         self.in_progress = False
-
-    def start_lobby(self):
-        if self.in_progress == True: return -1
-        joining_players = Queue()
-        return 0
+        self.turn_number = 0
 
     def start_game(self):
-        if self.in_progress == True: return -1
         self.in_progress = True
-        return 0
 
     def add_player(self, player):
-        num = self.lobby.add_player(player)
-        return num
+        return self.lobby.add_player(player)
 
     def remove_player(self, player):
-        num = self.lobby.remove_player(player)
-        return num
+        return self.lobby.remove_player(player)
+
+    def all_ready(self):
+        return self.lobby.all_ready()
+
+    def run_game(self):
+        pass
+
+    def to_dict(self):
+        game = {}
+        game["lobby"] = self.lobby.to_dict()
+        game["in_progress"] = self.in_progress
+        game["turn_number"] = self.turn_number
+        return game
