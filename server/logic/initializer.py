@@ -24,10 +24,9 @@ def load_professions_from_json():
             profession = json.load(open(full_path + prof_file))
             if profession["TPR-Type"] == "profession":
                 name = profession["name"]
-                description = profession["description"]
                 base_attributes = profession["base_attributes"]
                 actions = profession["actions"]
-                profession = Profession(name, description, base_attributes, actions)
+                profession = Profession(name, base_attributes, actions)
                 PROFESSION_LIST[name] = profession
             else:
                 raise Exception()

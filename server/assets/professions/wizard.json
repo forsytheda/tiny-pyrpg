@@ -14,9 +14,6 @@
     "actions": [
         "basic_attack",
         "basic_defend",
-        "basic_rest",
-        "fireball",
-        "lightning",
-        "ward"
+        "basic_rest"
     ]
 }

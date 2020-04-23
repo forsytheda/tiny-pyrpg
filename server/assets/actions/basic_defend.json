@@ -1,0 +1,15 @@
+{
+    "TPR-Type": "action",
+    "name": "Basic Defend",
+    "modifiers": [],
+    "statuses": [
+        {
+            "modifier": {
+                "attribute": "defense",
+                "change": 5
+            },
+            "duration": 1,
+            "duration_delta": 0
+        }
+    ]
+}

@@ -1,9 +1,8 @@
 ACTION_LIST = {}
 
 class Action:
-    def __init__(self, name, description, modifier_list, status_list):
+    def __init__(self, name, modifier_list, status_list):
         self.name = name
-        self.description = description
         self.modifier_list = modifier_list
         self.status_list = status_list
 

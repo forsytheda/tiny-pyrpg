@@ -1,0 +1,11 @@
+{
+    "TPR-Type": "action",
+    "name": "Basic Attack",
+    "modifiers": [
+        {
+            "attribute": "hp",
+            "change": 5
+        }
+    ],
+    "statuses": []
+}

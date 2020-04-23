@@ -1,0 +1,9 @@
+{
+    "response": "GAME START",
+    "available-actions":
+    [
+        "Basic Attack",
+        "Basic Defend",
+        "Basic Rest"
+    ]
+}

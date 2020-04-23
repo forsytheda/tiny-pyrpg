@@ -14,9 +14,6 @@
     "actions": [
         "basic_attack",
         "basic_defend",
-        "basic_rest",
-        "holy_shield",
-        "provoke",
-        "prayer"
+        "basic_rest"
     ]
 }

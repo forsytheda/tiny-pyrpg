@@ -14,9 +14,6 @@
     "actions": [
         "basic_attack",
         "basic_defend",
-        "basic_rest",
-        "healing_word",
-        "holy_smite",
-        "blessing"
+        "basic_rest"
     ]
 }
