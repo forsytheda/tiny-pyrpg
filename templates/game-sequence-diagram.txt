@@ -1,0 +1,121 @@
+
+title Tiny-PyRPG Game Progression
+
+participant "Client" as c
+participant "Server" as s
+
+==Start of sequence.==
+
+note over c,s: The server is started and a new game is created.\nThe server begins listening for clients.
+
+==A note on error handling.==
+
+note over c,s: If at any point in time the server receives a response that it is not expecting,\nit will send this response and act as if it was never received.
+
+s -> c: server-error.json
+note over c,s: "response": "ERROR",\n"data": "INVALID REQUEST"
+
+==The sequence beings with the client.==
+
+note over c,s: The client attempts to join the server.
+c -> s: client-join.json
+note over c,s: "request": "JOIN LOBBY",\n"data": "Player Name"
+
+alt lobby full
+s -> c: server-error.json
+note over c,s: "response":"ERROR",\n"data": "LOBBY FULL"
+note right of c: Break
+else name taken
+s -> c: server-error.json
+note over c,s: "response":"ERROR",\n"data": "NAME TAKEN"
+note right of c: Break
+else game started
+s -> c: server-error.json
+note over c,s: "response":"ERROR",\n"data": "GAME STARTED"
+note right of c: Break
+else join successful
+s -> c: server-join-accept.json
+note over c,s: "response":"JOIN ACCEPT",\n"data": {\n    "player-number": int(),\n    "lobby": Lobby()\n}
+note right of c: Continue
+end
+
+==The client has joined the lobby==
+
+loop While the game is not started
+
+note over c,s: Several actions can be taken while in the lobby.
+
+alt Player changes profession
+c -> s: client-update-profession.json
+note over c,s:"request":"UPDATE PROFESSION",\n"data": "PROFESSION"
+s -> c: server-lobby-data.json
+note over c,s:"response":"LOBBY DATA",\n"data": Lobby()
+note right of c: Restart Loop
+else Player changes ready state
+c -> s: client-ready.json
+note over c,s:"request":"UPDATE READY",\n"data": true/false
+s -> c: server-lobby-data.json
+note over c,s:"response":"LOBBY DATA",\n"data": Lobby()
+note right of c: Restart Loop
+
+else Player exits the lobby
+c -> s: client-exit.json
+note over c,s: "request": "EXIT",\n"data": null
+note right of c: Break
+else Player tries to start the game
+c -> s: client-start.json
+note over c,s: "request": "START GAME",\m"data": null
+note left of s: Check that all players are ready, and\n that there are an even # of players.
+alt Not all players are ready, or there are an off number of players
+s -> c: server-lobby-data.json
+note over c,s:"response":"LOBBY DATA",\n"data": Lobby()
+else All players are ready and there are an even number of players
+s -> c: server-game-start.json
+note over c,s: "response": "GAME START",\n"data": {\n"actions": Actions(),\n"game": Game()\n}
+note right of c: Continue
+end 
+end
+end
+
+==The game has now started==
+
+note over c,s: This loop is applied to every client. When a client ends their turn,\nthe server will rotate the "player-number" attribute of the game,\nand the new player will begin their turn.
+
+loop During the game
+note over c,s: If at any point during the game, the game ends, the reply to each client's\nnext request will always be the "Game Ended" response.
+
+alt Player takes an action
+c -> s: client-do-action.json
+note over c,s: "request": "DO ACTION",\n"data": "ACTION"
+alt Player's Turn
+s -> c: server-game-data.json
+note over c,s: "response": "GAME DATA",\n"data": Game()
+else Not Players Turn
+s -> c: server-error.json
+note over c,s: "response": "ERROR",\n"data": "NOT PLAYER TURN"
+else Game Ended
+s -> c: server-error.json
+note over c,s: "response": "ERROR",\n"data": "GAME ENDED"
+end
+else Player Refreshes Info
+c -> s: client-refresh
+note over c,s: "request": "REFRESH",\n"data": null
+alt Game In Progress
+s -> c: server-game-data.json
+note over c,s: "response": "GAME DATA",\n"data": Game()
+else Game Ended
+s -> c: server-error.json
+note over c,s: "response": "ERROR",\n"data": "GAME ENDED"
+end
+else Player Ends Turn
+c -> s: client-end-turn.json
+note over c,s: "request": "END TURN",\n"data": null
+alt Is Player's Turn
+s -> c: server-game-data.json
+note over c,s: "response": "GAME DATA",\n"data": Game()
+else Not Player's Turn
+s -> c: server-error.json
+note over c,s: "response": "ERROR",\n"data": "NOT PLAYER TURN"
+end
+end
+end

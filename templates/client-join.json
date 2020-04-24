@@ -1,4 +1,4 @@
 {
-    "request": "join-lobby",
+    "request": "JOIN LOBBY",
     "data": "PLAYER X NAME"
 }

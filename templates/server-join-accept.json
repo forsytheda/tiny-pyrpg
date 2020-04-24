@@ -1,0 +1,51 @@
+{
+    "response": "JOIN ACCEPT",
+    "data": 
+    {
+        "player-number": 1,
+        "lobby": {
+            "p1": 
+            {
+                "name": "PLAYER ONE NAME",
+                "profession": "PLAYER ONE PROFESSION",
+                "profession_description": "PLAYER ONE PROFESSION DESCRIPTION",
+                "ready": false
+            },
+            "p2": 
+            {
+                "name": "PLAYER TWO NAME",
+                "profession": "PLAYER TWO PROFESSION",
+                "profession_description": "PLAYER TWO PROFESSION DESCRIPTION",
+                "ready": true
+            },
+            "p3": 
+            {
+                "name": "PLAYER THREE NAME",
+                "profession": "PLAYER THREE PROFESSION",
+                "profession_description": "PLAYER THREE PROFESSION DESCRIPTION",
+                "ready": false
+            },
+            "p4": 
+            {
+                "name": "PLAYER FOUR NAME",
+                "profession": "PLAYER FOUR PROFESSION",
+                "profession_description": "PLAYER FOUR PROFESSION DESCRIPTION",
+                "ready": false
+            },
+            "p5": 
+            {
+                "name": "",
+                "profession": "",
+                "profession_description": "",
+                "ready": true
+            },
+            "p6": 
+            {
+                "name": "",
+                "profession": "",
+                "profession_description": "",
+                "ready": true
+            }
+        }
+    }
+}
