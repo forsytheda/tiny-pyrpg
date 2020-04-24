@@ -22,7 +22,6 @@ def load_professions_from_json():
     for prof_file in os.listdir(full_path):
         if prof_file.endswith('.json'):
             profession = json.load(open(full_path + prof_file))
-            print(profession)
             if profession["TPR-Type"] == "profession":
                 name = profession["name"]
                 description = profession["description"]
@@ -44,12 +43,12 @@ def load_actions_from_json():
             if action["TPR-Type"] == "action":
                 name = action["name"]
                 modifier_list = []
-                for modifier in action["modifier_list"]:
+                for modifier in action["modifiers"]:
                     attribute = modifier["attribute"]
                     change = modifier["change"]
                     modifier_list.append(Modifier(attribute, change))
                 status_list = []
-                for status in action["status_list"]:
+                for status in action["statuses"]:
                     modifier = status["modifier"]
                     attribute = modifier["attribute"]
                     change = modifier["change"]
