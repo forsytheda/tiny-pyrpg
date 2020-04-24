@@ -22,6 +22,7 @@ def load_professions_from_json():
     for prof_file in os.listdir(full_path):
         if prof_file.endswith('.json'):
             profession = json.load(open(full_path + prof_file))
+            print(profession)
             if profession["TPR-Type"] == "profession":
                 name = profession["name"]
                 description = profession["description"]
@@ -42,7 +43,6 @@ def load_actions_from_json():
             action = json.load(open(full_path + action_file))
             if action["TPR-Type"] == "action":
                 name = action["name"]
-                description = action["description"]
                 modifier_list = []
                 for modifier in action["modifier_list"]:
                     attribute = modifier["attribute"]
@@ -56,7 +56,7 @@ def load_actions_from_json():
                     duration = status["duration"]
                     duration_delta = status["duration_delta"]
                     status_list.append(Status(Modifier(attribute, change), duration, duration_delta))
-                ACTION_LIST[name] = Action(name, description, modifier_list, status_list)
+                ACTION_LIST[name] = Action(name, modifier_list, status_list)
             else:
                 raise Exception()
                 # TODO: Implement custom load exception
