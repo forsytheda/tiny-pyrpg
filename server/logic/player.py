@@ -8,9 +8,10 @@ class Player:
         self.ready = False
 
     def set_profession(self, profession_name):
-        if profession_name == "":
-            return
         self.profession = PROFESSION_LIST[profession_name]
+
+    def get_profession(self):
+        return self.profession
     
     def set_ready(self, ready):
         self.ready = ready
@@ -19,16 +20,14 @@ class Player:
         player = {}
         player["name"] = self.name
         player["profession"] = self.profession.name
-        player["profession_dsc"] = self.profession.description
+        player["profession_description"] = self.profession.description
         player["ready"] = self.ready
         return player
 
-
-def get_player(json):
-    name = json["name"]
-    profession = json["profession"]
-    ready = json["ready"]
-    player = Player(name)
-    player.set_profession(profession)
-    player.set_ready(ready)
-    return player
+def get_empty_player_dict():
+    p = {}
+    p["name"] = ""
+    p["profession"] = ""
+    p["profession_description"] = ""
+    p["ready"] = True
+    return p

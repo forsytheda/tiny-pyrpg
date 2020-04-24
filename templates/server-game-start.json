@@ -12,59 +12,62 @@
         {
             "turn-number": 0,
             "player-number": 1,
-            "p1": 
+            "players":
             {
-                "name": "PLAYER ONE NAME",
-                "profession": "PLAYER ONE PROFESSION",
-                "hp": [99,99],
-                "ap": [99,99],
-                "mana": [99,99],
-                "turn-in": 0
-            },
-            "p2": 
-            {
-                "name": "PLAYER TWO NAME",
-                "profession": "PLAYER TWO PROFESSION",
-                "hp": [99,99],
-                "ap": [99,99],
-                "mana": [99,99],
-                "turn-in": 1
-            },
-            "p3": 
-            {
-                "name": "PLAYER THREE NAME",
-                "profession": "PLAYER THREE PROFESSION",
-                "hp": [99,99],
-                "ap": [99,99],
-                "mana": [99,99],
-                "turn-in": 2
-            },
-            "p4": 
-            {
-                "name": "PLAYER FOUR NAME",
-                "profession": "PLAYER FOUR PROFESSION",
-                "hp": [99,99],
-                "ap": [99,99],
-                "mana": [99,99],
-                "turn-in": 3
-            },
-            "p5": 
-            {
-                "name": "",
-                "profession": "",
-                "hp": [0,0],
-                "ap": [0,0],
-                "mana": [0,0],
-                "turn-in": 0
-            },
-            "p6": 
-            {
-                "name": "",
-                "profession": "",
-                "hp": [0,0],
-                "ap": [0,0],
-                "mana": [0,0],
-                "turn-in": 0
+                "p1": 
+                {
+                    "name": "PLAYER ONE NAME",
+                    "profession": "PLAYER ONE PROFESSION",
+                    "hp": [99,99],
+                    "ap": [99,99],
+                    "mana": [99,99],
+                    "turn-in": 0
+                },
+                "p2": 
+                {
+                    "name": "PLAYER TWO NAME",
+                    "profession": "PLAYER TWO PROFESSION",
+                    "hp": [99,99],
+                    "ap": [99,99],
+                    "mana": [99,99],
+                    "turn-in": 1
+                },
+                "p3": 
+                {
+                    "name": "PLAYER THREE NAME",
+                    "profession": "PLAYER THREE PROFESSION",
+                    "hp": [99,99],
+                    "ap": [99,99],
+                    "mana": [99,99],
+                    "turn-in": 2
+                },
+                "p4": 
+                {
+                    "name": "PLAYER FOUR NAME",
+                    "profession": "PLAYER FOUR PROFESSION",
+                    "hp": [99,99],
+                    "ap": [99,99],
+                    "mana": [99,99],
+                    "turn-in": 3
+                },
+                "p5": 
+                {
+                    "name": "",
+                    "profession": "",
+                    "hp": [0,0],
+                    "ap": [0,0],
+                    "mana": [0,0],
+                    "turn-in": 0
+                },
+                "p6": 
+                {
+                    "name": "",
+                    "profession": "",
+                    "hp": [0,0],
+                    "ap": [0,0],
+                    "mana": [0,0],
+                    "turn-in": 0
+                }
             }
         }
     }    

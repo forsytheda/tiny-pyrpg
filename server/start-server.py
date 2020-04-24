@@ -7,84 +7,111 @@ from logic.game import Game
 from logic.lobby import Lobby, LobbyFullError, NameTakenError
 from logic.player import Player, get_player
 
-ACTIVE_PLAYERS = []
-
+# Starts the listener socket to accept a join clients.
 def start_listener(game):
-    print("Starting listener.")
+    print("NETWORK: Starting listener.")
     listener = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     listener.bind(("", 52000))
     listener.listen()
     while True:
         conn, addr = listener.accept()
-        print("Connection accepted from: {}.".format(addr))
+        print("NETWORK: Connection accepted from: {}.".format(addr))
         data = conn.recv(2048)
         if not data or data != "Tiny-PyRPG Client".encode():
-            print("Invalid connection. Shutting down connection.")
+            print("NETWORK: Invalid connection. Shutting down connection from {}.".format(addr))
             conn.shutdown(socket.SHUT_RDWR)
             conn.close()
             continue
-        print("Valid connection. Creating new client thread.")
-        ACTIVE_PLAYERS.append(addr)
-        threading._start_new_thread(client_socket, (conn,game))
+        print("NETWORK: Valid client. Creating new client thread for {}.".format(addr))
+        threading._start_new_thread(client_socket, (conn, game))
 
 def client_socket(conn, game):
     conn.sendall("Tiny-PyRPG Server".encode())
-    data = conn.recv(2048)
-    player = json.loads(data.decode())
-    player = get_player(player)
-    data = {}
+    data = json.loads(conn.recv(2048).decode())
+    request = data["request"]
+    data = data["data"]
+    if request != "JOIN LOBBY":
+        send_client_error(conn, "INVALID REQUEST")
+        return
+    username = data
+    if game.in_progress == True:
+        send_client_error(conn, "GAME STARTED")
+        return
     try:
-        game.lobby_lock.acquire()
-        player = game.add_player(player)
-        game.lobby_lock.release()
-    except LobbyFullError:
-        data["response"] = "LOBBY FULL"
-        data["game"] = None
-        data = json.dumps(data)
-        conn.sendall(data.encode())
-        conn.shutdown(socket.SHUT_RDWR)()
-        conn.close()
-        return
+        pnum = game.add_player(Player(username))
     except NameTakenError:
-        data["response"] = "NAME TAKEN"
-        data["game"] = None
-        data = json.dumps(data)
-        conn.sendall(data.encode())
-        conn.shutdown(socket.SHUT_RDWR)()
-        conn.close()
+        send_client_error(conn, "NAME TAKEN")
         return
-    data["response"] = "JOINED GAME"
-    data["game"] = game.to_dict()
-    data = json.dumps(data)
-    conn.sendall(data.encode())
-    while True:
-        data = conn.recv(2048)
-        data = json.loads(data.decode())
-        print(data)
+    except LobbyFullError:
+        send_client_error(conn, "LOBBY FULL")
+        return
+    data = {}
+    data["response"] = "JOIN ACCEPT"
+    jdata = {}
+    jdata["player-number"] = pnum
+    jdata["lobby"] = game.get_lobby_dict()
+    data["data"] = jdata
+    data = json.dumps(data).encode()
+    conn.sendall(data)
+    # The client has now joined the lobby.
+    while not game.in_progress:
+        data = json.loads(conn.recv(2048).decode())
         request = data["request"]
         data = data["data"]
-        if request == "START":
-            if game.all_ready():
-                game.in_progress = True
+        if request == "UPDATE PROFESSION":
+            profession = data
+            if game.update_player_profession(pnum, profession):
+                send_client_lobby(conn, game)
+                continue
+            else:
+                send_client_error(conn, "SERVER ERROR")
+                return
+        elif request == "GET UPDATE":
+            send_client_lobby(conn, game)
+            continue
         elif request == "UPDATE READY":
-            player.ready = data
-        elif request == "END TURN":
-            pass
-        elif request == "DO ACTION":
-            pass
-        elif request == "POST MESSAGE":
-            pass
-        elif request == "EXIT":
-            pass
-        else:
-            pass
+            ready = data
+            if game.update_player_ready(pnum, ready):
+                send_client_lobby(conn, game)
+                continue
+            else:
+                send_client_error(conn, "SERVER ERROR")
+                return
+        elif request == "TRY START":
+            if game.start_game():
+                package = {}
+                response = "GAME START"
+                data = {}
+                data["actions"] = game.get_player_profession(pnum).actions()
+                data["game"] = game.to_dict()
+
+            else:
+                send_client_error(conn, "PLAYERS NOT READY")
+                continue
+
+
+    # The game has now started.
+    while game.in_progress:
+        pass
+
+def send_client_lobby(conn, game):
+    data = {}
+    data["response"] = "LOBBY DATA"
+    data["data"] = game.get_lobby_dict()
+    conn.sendall(json.dumps(data).encode())
+
+def send_client_error(conn, msg):
+    data = {}
+    data["response"] == "ERROR"
+    data["data"] == msg
+    data = json.dumps(data).encode()
+    conn.sendall(data)
+    conn.shutdown(socket.SHUT_RDWR)
+    conn.close()
 
 def start_server():
     game = Game()
     threading._start_new_thread(start_listener, (game,))
-    while not game.in_progress:
-        time.sleep(.1)
-    game.run_game()
 
 if __name__ == "__main__":
     start_server()
