@@ -53,7 +53,7 @@ def send_client_end_game(conn, won="YOU LOSE"):
 
 def client_thread(conn, name):
     global game
-
+    print("CLIENT: Starting client thread for {}.".format(name))
     while game.in_lobby:
         cpkg = loads(conn.recv(4096).decode())
         if game.in_game:
@@ -64,6 +64,7 @@ def client_thread(conn, name):
         if request == "GET UPDATE":
             send_client_lobby(conn, name)
         elif request == "UPDATE PROFESSION":
+            print("CLIENT: Updating {}'s profession to {}.".format(name, data))
             game.set_player_profession(name, data)
             send_client_lobby(conn, name)
         elif request == "UPDATE READY":

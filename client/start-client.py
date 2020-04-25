@@ -193,7 +193,7 @@ class ClientSocket:
         response = response["response"]
 
         if response == "ERROR":
-            if data = "LOBBY FULL":
+            if data == "LOBBY FULL":
                 emsg = QErrorMessage()
                 emsg.setWindowTitle("Tiny-PyRPG | Error: Lobby full")
                 emsg.showMessage("Error: the lobby you tried to join is full. Exiting.")
