@@ -53,6 +53,7 @@ def send_client_end_game(conn, name, won="False"):
 
 def client_thread(conn, name):
     global game
+
     while game.in_lobby:
         cpkg = loads(conn.recv(4096).decode())
         if game.in_game:
@@ -80,6 +81,7 @@ def client_thread(conn, name):
             conn.close()
         else:
             send_client_error(conn, "INVALID REQUEST")
+
     while game.in_game:
         cpkg = loads(conn.recv(4096).decode())
         if not game.in_game:
@@ -160,3 +162,6 @@ def start_server():
     if game != None:
         return
     game = Game()
+
+if __name__ == "__main__":
+    start_server()
