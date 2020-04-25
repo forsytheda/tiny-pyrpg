@@ -9,8 +9,9 @@ class Profession:
         self.actions = actions
 
     def to_dict(self):
-        d = {}
-        d["name"] = self.name
-        d["description"] = self.description
-        d["base_attributes"] = self.base_attributes
-        d["actions"] = self.actions
+        player_dict = {}
+        player_dict["name"] = self.name
+        player_dict["description"] = self.description
+        player_dict["base_attributes"] = self.base_attributes
+        player_dict["actions"] = self.actions
+        return player_dict

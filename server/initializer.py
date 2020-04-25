@@ -7,12 +7,9 @@ from profession import PROFESSION_LIST, Profession
 PROFESSION_BASE_PATH = "\\assets\\professions\\"
 ACTION_BASE_PATH = "\\assets\\actions\\"
 
-initialized = False
-
 def init():
-    global initialized
-    if initialized:
-        return
+    PROFESSION_LIST.clear()
+    ACTION_LIST.clear()
     cwd = getcwd()
     prof_path = cwd + PROFESSION_BASE_PATH
     for prof_file in listdir(prof_path):
@@ -45,6 +42,7 @@ def init():
                     change = modifier["change"]
                     duration = status["duration"]
                     duration_delta = status["duration_delta"]
-                    status_list.append(Status(Modifier(attribute, change), duration, duration_delta))
+                    status_list.append(
+                        Status(Modifier(attribute, change), duration, duration_delta)
+                    )
                 ACTION_LIST[name] = Action(name, costs, modifier_list, status_list)
-    initialized = True

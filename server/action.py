@@ -13,7 +13,7 @@ class Modifier:
         self.change = change
 
 class Status:
-    def __init__(self, modifier, duration = 1, duration_delta = 0):
+    def __init__(self, modifier, duration=1, duration_delta=0):
         self.modifier = modifier
         self.duration = duration
         self.duration_delta = duration_delta

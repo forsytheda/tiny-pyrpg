@@ -1,10 +1,10 @@
-import initializer
 from threading import Lock
 from player import Player, get_empty_lobby_dict, get_empty_game_dict
 from action import ACTION_LIST
 
+import initializer
+
 class Game:
-    
     def __init__(self):
         initializer.init()
         self.in_lobby = True
@@ -52,10 +52,9 @@ class Game:
         pnum = self.get_player_number(name)
         if not self.players[pnum].is_alive:
             return -1
-        elif pnum != self.active_player:
+        if pnum != self.active_player:
             return -2
-        else:
-            return 0
+        return 0
 
     def set_player_profession(self, name, profession):
         self.lock.acquire()
@@ -71,7 +70,7 @@ class Game:
 
     def try_start(self):
         for player in self.players:
-            if player.ready == False:
+            if not player.ready:
                 return False
         self.in_lobby = False
         self.in_game = True
@@ -80,6 +79,7 @@ class Game:
         return True
 
     def try_action(self, source_name, target_number, action):
+        self.lock.acquire()
         source = self.players[self.get_player_number(source_name)]
         target = self.players[target_number - 1]
 
@@ -90,42 +90,108 @@ class Game:
         modifiers = action.modifier_list
         statuses = action.status_list
 
+        if source.attributes["ap"] - ap_cost < 0:
+            self.lock.release()
+            return -1
+        if source.attributes["mana"] - mana_cost < 0:
+            self.lock.release()
+            return -2
+        for modifier in modifiers:
+            attribute = modifier.attribute
+            change = modifier.change
+            target[attribute] -= change
+        target.statuses.extend(statuses)
+        self.lock.release()
+        return 0
+
+    def cycle_turn(self):
+        self.turn_number += 1
+        num_alive = 0
+        for player in self.players:
+            if player.is_alive:
+                num_alive += 1
+        if num_alive <= 1:
+            return -1
+        self.active_player = self.active_player + 1 % len(self.players)
+        self.players[self.active_player].process_statuses()
+
+        while not self.players[self.active_player].is_alive:
+            self.active_player = self.active_player + 1 % len(self.players)
+            self.players[self.active_player].process_statuses()
+        num_alive = 0
+        for player in self.players:
+            if player.is_alive:
+                num_alive += 1
+        if num_alive <= 1:
+            return -1
         return 0
 
     def get_lobby_dict(self):
-        d = {}
+        lobby_dict = {}
 
         if len(self.players) >= 1:
-            d["p1"] = self.players[0].lobby_dict()
+            lobby_dict["p1"] = self.players[0].lobby_dict()
         else:
-            d["p1"] = get_empty_lobby_dict()
+            lobby_dict["p1"] = get_empty_lobby_dict()
 
         if len(self.players) >= 2:
-            d["p2"] = self.players[1].lobby_dict()
+            lobby_dict["p2"] = self.players[1].lobby_dict()
         else:
-            d["p2"] = get_empty_lobby_dict()
+            lobby_dict["p2"] = get_empty_lobby_dict()
 
         if len(self.players) >= 3:
-            d["p3"] = self.players[2].lobby_dict()
+            lobby_dict["p3"] = self.players[2].lobby_dict()
         else:
-            d["p3"] = get_empty_lobby_dict()
+            lobby_dict["p3"] = get_empty_lobby_dict()
 
         if len(self.players) >= 4:
-            d["p4"] = self.players[3].lobby_dict()
+            lobby_dict["p4"] = self.players[3].lobby_dict()
         else:
-            d["p4"] = get_empty_lobby_dict()
+            lobby_dict["p4"] = get_empty_lobby_dict()
 
         if len(self.players) >= 5:
-            d["p5"] = self.players[4].lobby_dict()
+            lobby_dict["p5"] = self.players[4].lobby_dict()
         else:
-            d["p5"] = get_empty_lobby_dict()
+            lobby_dict["p5"] = get_empty_lobby_dict()
 
         if len(self.players) >= 6:
-            d["p6"] = self.players[5].lobby_dict()
+            lobby_dict["p6"] = self.players[5].lobby_dict()
         else:
-            d["p6"] = get_empty_lobby_dict()
+            lobby_dict["p6"] = get_empty_lobby_dict()
 
-        return d
+        return lobby_dict
 
     def get_game_dict(self):
-        return {}
+        game_dict = {}
+
+        if len(self.players) >= 1:
+            game_dict["p1"] = self.players[0].lobby_dict()
+        else:
+            game_dict["p1"] = get_empty_game_dict()
+
+        if len(self.players) >= 2:
+            game_dict["p2"] = self.players[1].lobby_dict()
+        else:
+            game_dict["p2"] = get_empty_game_dict()
+
+        if len(self.players) >= 3:
+            game_dict["p3"] = self.players[2].lobby_dict()
+        else:
+            game_dict["p3"] = get_empty_game_dict()
+
+        if len(self.players) >= 4:
+            game_dict["p4"] = self.players[3].lobby_dict()
+        else:
+            game_dict["p4"] = get_empty_game_dict()
+
+        if len(self.players) >= 5:
+            game_dict["p5"] = self.players[4].lobby_dict()
+        else:
+            game_dict["p5"] = get_empty_game_dict()
+
+        if len(self.players) >= 6:
+            game_dict["p6"] = self.players[5].lobby_dict()
+        else:
+            game_dict["p6"] = get_empty_game_dict()
+
+        return game_dict

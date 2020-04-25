@@ -43,7 +43,7 @@ def send_client_game(conn, name, response="GAME DATA"):
     spkg = dumps(spkg).encode()
     conn.sendall(spkg)
 
-def send_client_end_game(conn, name, won="False"):
+def send_client_end_game(conn, won="YOU LOSE"):
     global game
     spkg = {}
     spkg["response"] = "END GAME"
@@ -103,13 +103,25 @@ def client_thread(conn, name):
                 action = data["action"]
                 target = data["target"]
                 result = game.try_action(name, target, action)
+                if result == -1:
+                    send_client_error(conn, "NOT ENOUGH AP")
+                elif result == -2:
+                    send_client_error(conn, "NOT ENOUGH MANA")
+                else:
+                    send_client_game(conn, name)
         elif request == "END TURN":
-            pass
+            if status == -1:
+                send_client_error(conn, "NOT PLAYER TURN")
+            else:
+                result = game.cycle_turn()
+                if result == 0:
+                    send_client_game(conn, name)
+                elif result == -1:
+                    send_client_end_game(conn, "YOU WIN")
         else:
-            send_client_error(conn, "INVALID REQUEST")
-        
+            send_client_error(conn, "INVALID REQUEST")  
 
-def listener():
+def start_listener():
 
     global game
 
@@ -145,7 +157,10 @@ def listener():
             conn.close()
             continue
         elif result == -2:
-            print("ERROR: Client at {} tried to join as {}, but the name was already taken.".format(addr, name))
+            print(
+                "ERROR: Client at {} tried to join as {}, but the name was already taken."
+                .format(addr, name)
+            )
             send_client_error(conn, "NAME TAKEN")
             conn.shutdown(SHUT_RDWR)
             conn.close()
@@ -153,15 +168,16 @@ def listener():
         else:
             print("LOBBY: Player {} joined the lobby from connection {}.".format(name, addr))
             send_client_lobby(conn, name, "JOIN ACCEPT")
-            t = Thread(target=client_thread, args=(conn, name))
-            t.start()
+            c_thread = Thread(target=client_thread, args=(conn, name))
+            c_thread.start()
             continue
 
 def start_server():
     global game
-    if game != None:
+    if game is not None:
         return
     game = Game()
+    start_listener()
 
 if __name__ == "__main__":
     start_server()
