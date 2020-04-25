@@ -1,27 +1,23 @@
-from .profession import PROFESSION_LIST, Profession
-from .action import ACTION_LIST, Action, Modifier, Status
+from json import load
+from os import getcwd, listdir
 
-import json
-import os
+from action import ACTION_LIST, Action, Modifier, Status
+from profession import PROFESSION_LIST, Profession
 
-class Initializer:
+PROFESSION_BASE_PATH = "\\assets\\professions\\"
+ACTION_BASE_PATH = "\\assets\\actions\\"
 
-    def __init__(self):
-        self.initialized = False
+initialized = False
 
-    def init(self):
-        if not self.initialized:
-            self.initialized = True
-            load_professions_from_json()
-            load_actions_from_json()
-
-def load_professions_from_json():
-    cwd = os.getcwd()
-    base_path = '\\assets\\professions\\'
-    full_path = cwd + base_path
-    for prof_file in os.listdir(full_path):
+def init():
+    global initialized
+    if initialized:
+        return
+    cwd = getcwd()
+    prof_path = cwd + PROFESSION_BASE_PATH
+    for prof_file in listdir(prof_path):
         if prof_file.endswith('.json'):
-            profession = json.load(open(full_path + prof_file))
+            profession = load(open(prof_path + prof_file))
             if profession["TPR-Type"] == "profession":
                 name = profession["name"]
                 description = profession["description"]
@@ -29,17 +25,11 @@ def load_professions_from_json():
                 actions = profession["actions"]
                 profession = Profession(name, description, base_attributes, actions)
                 PROFESSION_LIST[name] = profession
-            else:
-                raise Exception()
-                # TODO: Implement custom load exception
     PROFESSION_LIST["None"] = Profession("None", "Someone who has not chosen a profession", {}, [])
-
-def load_actions_from_json():
-    base_path = '\\assets\\actions\\'
-    full_path = os.getcwd() + base_path
-    for action_file in os.listdir(full_path):
+    action_path = cwd + ACTION_BASE_PATH
+    for action_file in listdir(action_path):
         if action_file.endswith('.json'):
-            action = json.load(open(full_path + action_file))
+            action = load(open(action_path + action_file))
             if action["TPR-Type"] == "action":
                 name = action["name"]
                 costs = action["costs"]
@@ -57,6 +47,4 @@ def load_actions_from_json():
                     duration_delta = status["duration_delta"]
                     status_list.append(Status(Modifier(attribute, change), duration, duration_delta))
                 ACTION_LIST[name] = Action(name, costs, modifier_list, status_list)
-            else:
-                raise Exception()
-                # TODO: Implement custom load exception
+    initialized = True

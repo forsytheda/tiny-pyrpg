@@ -1,7 +1,7 @@
 PROFESSION_LIST = {}
 
 class Profession:
-    
+
     def __init__(self, name, description, base_attributes, actions):
         self.name = name
         self.description = description
@@ -9,9 +9,8 @@ class Profession:
         self.actions = actions
 
     def to_dict(self):
-        p = {}
-        p["name"] = self.name
-        p["description"] = self.description
-        p["base_attributes"] = self.base_attributes
-        p["actions"] = self.actions
-        return p
+        d = {}
+        d["name"] = self.name
+        d["description"] = self.description
+        d["base_attributes"] = self.base_attributes
+        d["actions"] = self.actions
