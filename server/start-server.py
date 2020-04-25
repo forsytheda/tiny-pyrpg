@@ -1,11 +1,11 @@
 import json
 import socket
 import threading
-import time
 
 from logic.game import Game
 from logic.lobby import Lobby, LobbyFullError, NameTakenError
-from logic.player import Player, get_player
+from logic.player import Player
+from logic.action import ACTION_LIST
 
 # Starts the listener socket to accept a join clients.
 def start_listener(game):
@@ -83,22 +83,72 @@ def client_socket(conn, game):
                 response = "GAME START"
                 data = {}
                 data["actions"] = game.get_player_profession(pnum).actions()
-                data["game"] = game.to_dict()
-
+                data["game"] = game.get_game_dict()
+                conn.sendall(json.dumps(data).encode())
+                break
             else:
                 send_client_error(conn, "PLAYERS NOT READY")
                 continue
-
+        elif request == "EXIT":
+            game.remove_player(pnum)
+            conn.shutdown(socket.SHUT_RDWR)
+            conn.close()
+            return
 
     # The game has now started.
     while game.in_progress:
-        pass
+        data = json.loads(conn.recv(2048).decode())
+        if not game.in_progress:
+            send_client_end_game()
+            break
+        if not game.is_player_alive(pnum):
+            send_client_death(conn)
+            conn.shutdown(socket.SHUT_RDWR)
+            conn.close()
+            return
+        request = data["request"]
+        data = data["data"]
+        if request == "GET UPDATE":
+            send_client_game(conn, game)
+            continue
+        elif request == "DO ACTION":
+            if pnum != game.get_active_player():
+                send_client_error(conn, "NOT PLAYER TURN")
+                continue
+            action = ACTION_LIST[data["action"]]
+            source = pnum
+            target = data["target"]
+            game.do_action(action, source, target)
+            send_client_game(conn, game)
+            continue
+        elif request == "END TURN":
+            if pnum != game.get_active_player():
+                send_client_error(conn, "NOT PLAYER TURN")
+                continue
+            game.end_turn()
+            send_client_game()
+            continue
+        else:
+            send_client_error("INVALID REQUEST")
+            continue
+
 
 def send_client_lobby(conn, game):
     data = {}
     data["response"] = "LOBBY DATA"
     data["data"] = game.get_lobby_dict()
     conn.sendall(json.dumps(data).encode())
+
+def send_client_game(conn, game):
+    data = {}
+    data["response"] = "GAME DATA"
+    data["data"] = game.get_game_dict()
+    conn.sendall(json.dumps(data).encode())
+
+def send_client_end_game(conn, game):
+    data = {}
+    data["response"] = "END GAME"
+    data["data"] = game.get_winner()
 
 def send_client_error(conn, msg):
     data = {}

@@ -20,8 +20,7 @@
                     "profession": "PLAYER ONE PROFESSION",
                     "hp": [99,99],
                     "ap": [99,99],
-                    "mana": [99,99],
-                    "turn-in": 0
+                    "mana": [99,99]
                 },
                 "p2": 
                 {
@@ -29,8 +28,7 @@
                     "profession": "PLAYER TWO PROFESSION",
                     "hp": [99,99],
                     "ap": [99,99],
-                    "mana": [99,99],
-                    "turn-in": 1
+                    "mana": [99,99]
                 },
                 "p3": 
                 {
@@ -38,8 +36,7 @@
                     "profession": "PLAYER THREE PROFESSION",
                     "hp": [99,99],
                     "ap": [99,99],
-                    "mana": [99,99],
-                    "turn-in": 2
+                    "mana": [99,99]
                 },
                 "p4": 
                 {
@@ -47,8 +44,7 @@
                     "profession": "PLAYER FOUR PROFESSION",
                     "hp": [99,99],
                     "ap": [99,99],
-                    "mana": [99,99],
-                    "turn-in": 3
+                    "mana": [99,99]
                 },
                 "p5": 
                 {
@@ -56,8 +52,7 @@
                     "profession": "",
                     "hp": [0,0],
                     "ap": [0,0],
-                    "mana": [0,0],
-                    "turn-in": 0
+                    "mana": [0,0]
                 },
                 "p6": 
                 {
@@ -65,8 +60,7 @@
                     "profession": "",
                     "hp": [0,0],
                     "ap": [0,0],
-                    "mana": [0,0],
-                    "turn-in": 0
+                    "mana": [0,0]
                 }
             }
         }

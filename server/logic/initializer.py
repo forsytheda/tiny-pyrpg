@@ -42,6 +42,7 @@ def load_actions_from_json():
             action = json.load(open(full_path + action_file))
             if action["TPR-Type"] == "action":
                 name = action["name"]
+                costs = action["costs"]
                 modifier_list = []
                 for modifier in action["modifiers"]:
                     attribute = modifier["attribute"]
@@ -55,7 +56,7 @@ def load_actions_from_json():
                     duration = status["duration"]
                     duration_delta = status["duration_delta"]
                     status_list.append(Status(Modifier(attribute, change), duration, duration_delta))
-                ACTION_LIST[name] = Action(name, modifier_list, status_list)
+                ACTION_LIST[name] = Action(name, costs, modifier_list, status_list)
             else:
                 raise Exception()
                 # TODO: Implement custom load exception

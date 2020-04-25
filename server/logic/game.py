@@ -1,3 +1,4 @@
+from .action import ACTION_LIST
 from .initializer import Initializer
 from .lobby import Lobby
 from .game_players import GamePlayers
@@ -55,6 +56,13 @@ class Game:
         self.lobby_lock.release()
         return result
 
+    def is_player_alive(self, number):
+        player = self.get_player_by_number(number)
+        return player.isAlive
+
+    def get_player_by_number(self, number):
+        return self.game_players.get_player_by_number(number)
+
     def all_ready(self):
         return self.lobby.all_ready()
 
@@ -64,7 +72,7 @@ class Game:
         self.lobby_lock.release()
         return l
 
-    def to_dict(self):
+    def get_game_dict(self):
         self.lobby_lock.acquire()
         game = {}
         game["turn_number"] = self.turn_number
@@ -72,3 +80,18 @@ class Game:
         game["players"] = self.game_players.to_dict()
         self.lobby_lock.release()
         return game
+
+    def do_action(self, action, source, target):
+        source = self.game_players.get_player_by_number(source)
+        target = self.game_players.get_player_by_number(target)
+        self.game_players.do_action(action, source, target)
+
+    def get_active_player(self):
+        self.game_players.get_active_player()
+
+    def end_turn(self):
+        self.turn_number += 1
+        self.game_players.advance_turn()
+        self.active_player = self.game_players.active_player
+        if game_players.game_is_done():
+            self.in_progress = False

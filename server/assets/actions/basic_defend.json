@@ -1,8 +1,14 @@
 {
     "TPR-Type": "action",
     "name": "Basic Defend",
+    "costs": 
+    {
+        "ap": 2,
+        "mana": 0
+    },
     "modifiers": [],
-    "statuses": [
+    "statuses": 
+    [
         {
             "modifier": {
                 "attribute": "defense",

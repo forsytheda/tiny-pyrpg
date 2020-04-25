@@ -1,4 +1,8 @@
 {
     "request": "DO ACTION",
-    "data": "ACTION"
+    "data": 
+    {
+        "action": "ACTION",
+        "target": 1
+    }
 }

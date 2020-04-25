@@ -1,6 +1,11 @@
 {
     "TPR-Type": "action",
     "name": "Basic Defend",
+    "costs": 
+    {
+        "ap": 2,
+        "mana": 5
+    },
     "modifiers": [
         {
             "attribute": "hp",

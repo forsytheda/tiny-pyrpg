@@ -181,39 +181,38 @@ class ClientSocket:
             self.parent.go_to_main_menu()
             return
 
-        player = {}
-        player["name"] = self.parent.username
-        player["profession"] = "None"
-        player["profession_dsc"] = ""
-        player["ready"] = self.parent.ready
-
-        self.parent.player = player
-
-        player = json.dumps(player).encode()
-        self.sock.sendall(player)
+        data = {}
+        data["request"] = "JOIN LOBBY"
+        data["data"] = self.parent.username
+        data = json.dumps[data].encode()
+        self.sock.sendall(data)
 
         response = self.sock.recv(2048)
         response = json.loads(response)
-        game = response["game"]
+        data = response["data"]
         response = response["response"]
 
-        if response == "LOBBY FULL":
-            emsg = QErrorMessage()
-            emsg.setWindowTitle("Tiny-PyRPG | Error: Lobby full")
-            emsg.showMessage("Error: the lobby you tried to join is full. Exiting.")
-            self.parent.go_to_main_menu()
-            return
-        elif response == "NAME TAKEN":
-            emsg = QErrorMessage()
-            emsg.setWindowTitle("Tiny-PyRPG | Error: Name Taken")
-            emsg.showMessage("Error: the lobby you tried to join already has someone with the name you chose. Exiting.")
-            self.parent.go_to_main_menu()
-            return
-        elif response != "JOINED GAME":
-            emsg = QErrorMessage()
-            emsg.setWindowTitle("TinyPyRPG | Error: Unknown Error")
-            emsg.showMessage("Error: the server sent a response we do not understand. Please try again. Exiting.")
-            self.parent.go_to_main_menu()
+        if response == "ERROR":
+            if data = "LOBBY FULL":
+                emsg = QErrorMessage()
+                emsg.setWindowTitle("Tiny-PyRPG | Error: Lobby full")
+                emsg.showMessage("Error: the lobby you tried to join is full. Exiting.")
+                self.sock.shutdown(socket.SHUT_RDWR)
+                self.sock.close()
+                self.parent.go_to_main_menu()
+                return
+            elif data == "NAME TAKEN":
+                emsg = QErrorMessage()
+                emsg.setWindowTitle("Tiny-PyRPG | Error: Name Taken")
+                emsg.showMessage("Error: the lobby you tried to join already has someone with the name you chose. Exiting.")
+                self.sock.shutdown(socket.SHUT_RDWR)
+                self.sock.close()
+                self.parent.go_to_main_menu()
+                return
+        elif response == "JOIN ACCEPT":
+            pnum = data["player-number"]
+            lobby = data["lobby"]
+            
             
         self.parent.response_queue.put(("UPDATE GAME", game))
 

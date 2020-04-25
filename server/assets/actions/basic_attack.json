@@ -1,6 +1,11 @@
 {
     "TPR-Type": "action",
     "name": "Basic Attack",
+    "costs": 
+    {
+        "ap": 3,
+        "mana": 0
+    },
     "modifiers": [
         {
             "attribute": "hp",

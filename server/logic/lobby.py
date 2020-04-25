@@ -45,28 +45,28 @@ class Lobby:
         else:
             raise LobbyFullError()
 
-    def remove_player(self, player):
-        if self.p1 == player:
+    def remove_player(self, pnum):
+        if pnum == 1:
             self.p1 == None
             self.names.remove(player.name)
             return 1
-        elif self.p2 == player:
+        elif pnum == 2:
             self.p2 = None
             self.names.remove(player.name)
             return 2
-        elif self.p3 == player:
+        elif pnum == 3:
             self.p3 = None
             self.names.remove(player.name)
             return 3
-        elif self.p4 == player:
+        elif pnum == 4:
             self.p4 = None
             self.names.remove(player.name)
             return 4
-        elif self.p5 == player:
+        elif pnum == 5:
             self.p5 = None
             self.names.remove(player.name)
             return 5
-        elif self.p6 == player:
+        elif pnum == 6:
             self.p6 = None
             self.names.remove(player.name)
             return 6

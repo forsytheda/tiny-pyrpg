@@ -5,11 +5,7 @@
     "base_attributes": {
         "base_hp": 150,
         "base_ap": 5,
-        "base_mana": 20,
-        "offset_attack": 4,
-        "offset_defense": 15,
-        "offset_recover_hp": 15,
-        "offset_recover_mana": 10
+        "base_mana": 20
     },
     "actions": [
         "basic_attack",
