@@ -131,7 +131,9 @@ class LobbyMenu(QMainWindow):
         if self.parent.player["profession"] != prof:
             self.parent.player["profession"] = prof
             self.parent.command_queue.put("UPDATE PROFESSION")
-
+    def readonly(self):
+        print("This Ran")
+        self.ui.btn_start.setEnabled(False)
     def set_prof_warrior(self):
         self._set_profession("Warrior")
 
@@ -245,14 +247,13 @@ class ClientSocket:
                 self.parent.player = lobby["p6"]
             
         print("test 3")                
-        self.parent.response_queue.put(("GET UPDATE", lobby))
+        #self.parent.command_queue.put(("GET UPDATE", lobby))
+        self.parent.command_queue.put("GET UPDATE")
         print("test 6")
 
         while True:
             command = self.parent.command_queue.get()
-            print("bad test")
             if command == "UPDATE PROFESSION":
-                print("test 5")
                 data = {}
                 data["request"] = "UPDATE PROFESSION"
                 data["data"] = self.parent.player["profession"]
@@ -262,15 +263,12 @@ class ClientSocket:
                 response = json.loads(response.decode())
                 game = response["data"]
                 response = response["response"]
-                print("test 1")
                 if response != "LOBBY DATA":
                     emsg = QErrorMessage()
                     emsg.setWindowTitle("Tiny-PyRPG | Error: Command Invalid")
                     emsg.showMessage("Error: the action you just tried to do is broken. Please contact the developer.")
-                    continue
-                print("Test 2")                
+                    continue               
                 self.parent.window._update_players(game)
-                print("Updating profession to {}".format(self.parent.player["profession"]))
                 
             elif command == "UPDATE READY":
                 data = {}
@@ -302,6 +300,9 @@ class ClientSocket:
                 print("test 8")
                 game = response["data"]
                 response = response["response"]
+                pn = game["player-number"]
+                if int(pn)!= 1:
+                    self.parent.window.readonly()
                 if response != "LOBBY DATA":
                     emsg = QErrorMessage()
                     emsg.setWindowTitle("Tiny-PyRPG | Error: Command Invalid")
