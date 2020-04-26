@@ -1,0 +1,15 @@
+{
+    "TPR-Type": "profession",
+    "name": "Wizard",
+    "description": "A knowledgable seer with great powers.",
+    "base_attributes": {
+        "base_hp": 60,
+        "base_ap": 5,
+        "base_mana": 100
+    },
+    "actions": [
+        "basic_attack",
+        "basic_defend",
+        "basic_rest"
+    ]
+}

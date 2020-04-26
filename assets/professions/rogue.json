@@ -1,0 +1,15 @@
+{
+    "TPR-Type": "profession",
+    "name": "Rogue",
+    "description": "A sneaky silhouette cloaked in shadows and mystery.",
+    "base_attributes": {
+        "base_hp": 80,
+        "base_ap": 6,
+        "base_mana": 30
+    },
+    "actions": [
+        "basic_attack",
+        "basic_defend",
+        "basic_rest"
+    ]
+}
