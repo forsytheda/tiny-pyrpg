@@ -13,6 +13,7 @@ from PyQt5.QtWidgets import QMainWindow
 from PyQt5.QtWidgets import QPushButton
 from PyQt5.QtWidgets import QLineEdit
 from PyQt5.QtWidgets import QErrorMessage
+from PyQt5.QtWidgets import QMessageBox
 from PyQt5 import QtCore
 
 # UI imports
@@ -20,6 +21,7 @@ from gui.main_menu import Ui_TPRMainMenu
 from gui.lobby_menu import Ui_TPRLobbyMenu
 from gui.game_menu import Ui_TPRGameMenu
 
+########### Main Menu  #####################
 class MainMenu(QMainWindow):
 
     def __init__(self, parent):
@@ -253,9 +255,9 @@ class GameMenu(QMainWindow):
         self.parent.command_queue.put("END TURN")
     def doAction(self):
         selectedAction = self.ui.list_actions.selectedItems()
-        print(selectedAction[0].text())
         if selectedAction ==  []:
-            pass #Send message to select an action
+            msg = "Select an action"
+            self.parent.signal.sig_with_strs.emit(msg)
         else:
             tempAction = str(selectedAction[0].text())
             self.action["action"] = tempAction
@@ -294,7 +296,8 @@ class GameMenu(QMainWindow):
 
 class MySignal(QtCore.QObject):
     sig_no_args = QtCore.pyqtSignal()
-    sig_with_str = QtCore.pyqtSignal(str)
+    sig_with_strs = QtCore.pyqtSignal(str)
+    sig_quit = QtCore.pyqtSignal()
 
 #####################################    Start Client Socket    ###################################
 class ClientSocket:
@@ -355,10 +358,7 @@ class ClientSocket:
                 return
         elif response == "JOIN ACCEPT":
             pnum = data["player-number"]
-            print("test1")
             lobby = data["lobby"]
-            print(lobby)
-            print("test2")
             if pnum == 1:
                 self.parent.player = lobby["p1"]
             elif pnum == 2:
@@ -396,9 +396,8 @@ class ClientSocket:
                     print("Game Starting")
                     break
                 if response != "LOBBY DATA":
-                    emsg = QErrorMessage()
-                    emsg.setWindowTitle("Tiny-PyRPG | Error: Command Invalid")
-                    emsg.showMessage("Error: the action you just tried to do is broken. Please contact the developer.")
+                    msg = game
+                    self.parent.signal.sig_with_strs.emit(msg)
                     continue               
                 self.parent.window._update_players(game)
 
@@ -419,9 +418,8 @@ class ClientSocket:
                     print("Game Starting")
                     break
                 if response != "LOBBY DATA":
-                    emsg = QErrorMessage()
-                    emsg.setWindowTitle("Tiny-PyRPG | Error: Command Invalid")
-                    emsg.showMessage("Error: the action you just tried to do is broken. Please contact the developer.")
+                    msg = game
+                    self.parent.signal.sig_with_strs.emit(msg)
                     continue                
                 self.parent.window._update_players(game)
                 print("Ready state is now {}".format(self.parent.ready))
@@ -446,9 +444,8 @@ class ClientSocket:
                 if int(pn)!= 1:
                     self.parent.window.readonly()
                 if response != "LOBBY DATA":
-                    emsg = QErrorMessage()
-                    emsg.setWindowTitle("Tiny-PyRPG | Error: Command Invalid")
-                    emsg.showMessage("Error: the action you just tried to do is broken. Please contact the developer.")
+                    msg = game
+                    self.parent.signal.sig_with_strs.emit(msg)
                     continue
                 self.parent.window._update_players(game)
                 print("Lobby Refreshed")
@@ -471,12 +468,14 @@ class ClientSocket:
                     print("Game Starting")
                     break
                 elif resp == "LOBBY DATA":
+                    msg = "Not all players are ready."
+                    self.parent.signal.sig_with_strs.emit(msg)
                     print("There are players who are not ready.")
                     continue
+                    
                 else:
-                    emsg = QErrorMessage()
-                    emsg.setWindowTitle("Tiny-PyRPG | Error: Command Invalid")
-                    emsg.showMessage("Error: the action you just tried to do is broken. Please contact the developer.")
+                    msg = game
+                    self.parent.signal.sig_with_strs.emit(msg)
                     continue
             
             #Exit Lobby
@@ -489,7 +488,6 @@ class ClientSocket:
                 self.sock.shutdown(socket.SHUT_RDWR)
                 self.sock.close()
                 print("Exiting")
-                #quit()
             else:
                 pass
         
@@ -507,22 +505,26 @@ class ClientSocket:
                 data["request"] = "DO ACTION"
                 actionData = self.parent.window.action
                 data["data"] = actionData
-                print(data)
                 data = json.dumps(data).encode()
                 self.sock.sendall(data)
                 response = self.sock.recv(4096)
                 response = json.loads(response.decode())
                 game = response["data"]
                 response = response["response"]
-                if response == "ERROR":
-                    emsg = QErrorMessage(self.parent.window)
-                    emsg.setWindowTitle("Tiny-PyRPG | Error: Out of AP")
-                    emsg.showMessage("Error: Hey guy, You are out of AP.")
+                if response == "END GAME":
+                    msg = game
+                    self.parent.signal.sig_with_strs.emit(msg)
+                    self.sock.shutdown(socket.SHUT_RDWR)
+                    self.sock.close()
+                    self.parent.signal.sig_quit.emit()
+                    break
+                elif response == "ERROR":
+                    msg = game
+                    self.parent.signal.sig_with_strs.emit(msg)
                     continue
                 elif response != "GAME DATA":
-                    emsg = QErrorMessage(self.parent.window)
-                    emsg.setWindowTitle("Tiny-PyRPG | Error: Command Invalid")
-                    emsg.showMessage("Error: the action you just tried to do is broken. Please contact the developer.")
+                    msg = game
+                    self.parent.signal.sig_with_strs.emit(msg)
                     continue
                 self.parent.window._update_players(game)
                 print("Lobby Refreshed")
@@ -538,10 +540,16 @@ class ClientSocket:
                 response = json.loads(response.decode())
                 game = response["data"]
                 response = response["response"]
-                if response != "GAME DATA":
-                    emsg = QErrorMessage()
-                    emsg.setWindowTitle("Tiny-PyRPG | Error: Command Invalid")
-                    emsg.showMessage("Error: the action you just tried to do is broken. Please contact the developer.")
+                if response == "END GAME":
+                    msg = game
+                    self.parent.signal.sig_with_strs.emit(msg)
+                    self.sock.shutdown(socket.SHUT_RDWR)
+                    self.sock.close()
+                    self.parent.signal.sig_quit.emit()
+                    break
+                elif response != "GAME DATA":
+                    msg = game
+                    self.parent.signal.sig_with_strs.emit(msg)
                     continue
                 self.parent.window._update_players(game)
                 print("Lobby Refreshed")
@@ -557,10 +565,17 @@ class ClientSocket:
                 response = json.loads(response.decode())
                 game = response["data"]
                 response = response["response"]
-                if response != "GAME DATA":
-                    emsg = QErrorMessage()
-                    emsg.setWindowTitle("Tiny-PyRPG | Error: Command Invalid")
-                    emsg.showMessage("Error: the action you just tried to do is broken. Please contact the developer.")
+                if response == "END GAME":
+                    msg = game
+                    self.parent.signal.sig_with_strs.emit(msg)
+                    time.sleep(1)
+                    self.sock.shutdown(socket.SHUT_RDWR)
+                    self.sock.close()
+                    self.parent.signal.sig_quit.emit()
+                    break
+                elif response != "GAME DATA":
+                    msg = game
+                    self.parent.signal.sig_with_strs.emit(msg)
                     continue
                 self.parent.window._update_players(game)
                 print("Turn Ended")
@@ -571,11 +586,18 @@ class Client:
     def __init__(self):
         self.signal = MySignal()
         self.signal.sig_no_args.connect(self.go_to_game)
+        self.signal.sig_with_strs.connect(self.errorMessage)
+        self.signal.sig_quit.connect(self.quit_app)
         self.app = QApplication(sys.argv)
         self.window = MainMenu(self)
         self.window.show()
         self.app.exec_()
 
+    def errorMessage(self, msg):
+        emsg = QMessageBox()
+        emsg.setWindowTitle("Tiny-PyRPG")
+        emsg.setText(msg)
+        emsg.exec_()
 
     def go_to_main_menu(self):
         self.window.hide()
@@ -594,6 +616,14 @@ class Client:
         del self.window
         self.window = GameMenu(self)
         self.window.show()
+    
+    def quit_app(self):
+        time.sleep(5)
+        self.window.hide()
+        del self.window        
+        self.app.quit()
+        sys.exit()
+        
 
 def startClientSocket(client):
     client.socket = ClientSocket(client)
