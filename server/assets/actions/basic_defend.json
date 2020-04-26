@@ -11,8 +11,8 @@
     [
         {
             "modifier": {
-                "attribute": "defense",
-                "change": 5
+                "attribute": "hp",
+                "change": 4
             },
             "duration": 1,
             "duration_delta": 0
