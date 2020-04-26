@@ -20,8 +20,7 @@ def init():
                 description = profession["description"]
                 base_attributes = profession["base_attributes"]
                 actions = profession["actions"]
-                profession = Profession(name, description, base_attributes, actions)
-                PROFESSION_LIST[name] = profession
+                PROFESSION_LIST[name] = Profession(name, description, base_attributes, actions)
     PROFESSION_LIST["None"] = Profession("None", "Someone who has not chosen a profession", {}, [])
     action_path = cwd + ACTION_BASE_PATH
     for action_file in listdir(action_path):

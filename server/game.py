@@ -1,6 +1,7 @@
 from threading import Lock
 from player import Player, get_empty_lobby_dict, get_empty_game_dict
 from action import ACTION_LIST
+from profession import PROFESSION_LIST
 
 import initializer
 
@@ -59,7 +60,7 @@ class Game:
     def get_player_actions(self, name):
         self.lock.acquire()
         pnum = self.get_player_number(name)
-        actions = self.players[pnum].profession.actions
+        actions = self.players[pnum].actions
         self.lock.release()
         return actions
 
@@ -118,7 +119,9 @@ class Game:
 
     def cycle_turn(self):
         self.lock.acquire()
+        print("TN Before cycle: {}".format(self.turn_number))
         self.turn_number += 1
+        print("TN After cycle: {}".format(self.turn_number))
         num_alive = 0
         for player in self.players:
             if player.is_alive:
@@ -126,7 +129,9 @@ class Game:
         if num_alive <= 1:
             self.lock.release()
             return -1
-        self.active_player = self.active_player + 1 % len(self.players)
+        print("Active player before cycle: {}".format(self.active_player))
+        self.active_player = (self.active_player + 1) % len(self.players)
+        print("Active player after cycle: {}".format(self.active_player))
         self.players[self.active_player].process_statuses()
 
         while not self.players[self.active_player].is_alive:

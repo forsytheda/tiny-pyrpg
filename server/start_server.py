@@ -36,11 +36,12 @@ def send_client_game(conn, name, game, response="GAME DATA"):
     """ Sends the client the current state of the game. """
     spkg = {}
     spkg["response"] = response
+    pnum = game.get_player_number(name) + 1
     data = {}
+    game_dict = game.get_game_dict()
+    game_dict["player-number"] = pnum
     data["actions"] = game.get_player_actions(name)
-    game = game.get_game_dict()
-    game["player-number"] = game.get_player_number(name) + 1
-    data["game"] = game
+    data["game"] = game_dict
     spkg["data"] = data
     spkg = json.dumps(spkg).encode()
     conn.sendall(spkg)
@@ -156,6 +157,12 @@ def client_do_action(conn, name, game, data, status):
 def process_game_request(conn, name, game):
     """ This method is used to process a request while in the game. """
 
+    valid_commands = [
+        "GET UPDATE",
+        "DO ACTION",
+        "END TURN"
+    ]
+
     # Listen for the request.
     cpkg = json.loads(conn.recv(4096).decode())
 
@@ -170,6 +177,7 @@ def process_game_request(conn, name, game):
 
     # Check the status of the player, and if they died, then they have lost.
     status = game.get_player_status(name)
+    print("{}: has the status of {}.".format(name, status))
     if status == -1:
         print("{}: died and is leaving the game.".format(name))
         send_client_end_game(conn)
@@ -178,7 +186,7 @@ def process_game_request(conn, name, game):
     # If the request is to get an update, send them the game.
     if request == "GET UPDATE":
         print("{}: is getting an updated game.".format(name))
-        send_client_game(conn, name, game, data)
+        send_client_game(conn, name, game)
 
     # If the request is to do an action, try it.
     if request == "DO ACTION":
@@ -207,9 +215,11 @@ def process_game_request(conn, name, game):
                 print("CLIENT: {} won the game!".format(name))
                 send_client_end_game(conn, "YOU WIN")
                 return False
-    else:
+
+    if request not in valid_commands:
         print("CLIENT: {} sent an invalid request.".format(name))
         send_client_error(conn, "INVALID REQUEST")
+        
     return True
 
 def client_thread(conn, name, game):

@@ -11,6 +11,7 @@ class Player:
         self.ready = False
         self.statuses = []
         self.is_alive = True
+        self.actions = []
 
     def set_profession(self, profession):
         self.profession = PROFESSION_LIST[profession]
@@ -21,6 +22,7 @@ class Player:
         self.attributes["max_ap"] = 0 + self.profession.base_attributes["base_ap"]
         self.attributes["mana"] = 0 + self.profession.base_attributes["base_mana"]
         self.attributes["max_mana"] = 0 + self.profession.base_attributes["base_mana"]
+        self.actions = self.profession.actions
 
     def set_ready(self, ready):
         self.ready = ready
