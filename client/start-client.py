@@ -66,15 +66,14 @@ class LobbyMenu(QMainWindow):
         self.ui = Ui_TPRLobbyMenu()
         self.ui.setupUi(self)
         self.ui.lbl_connected_ip.setText(self.parent.connected_ip)
-
         self.ui.btn_select_cleric.clicked.connect(self.set_prof_cleric)
         self.ui.btn_select_monk.clicked.connect(self.set_prof_monk)
         self.ui.btn_select_paladin.clicked.connect(self.set_prof_paladin)
         self.ui.btn_select_rogue.clicked.connect(self.set_prof_rogue)
         self.ui.btn_select_warrior.clicked.connect(self.set_prof_warrior)
         self.ui.btn_select_wizard.clicked.connect(self.set_prof_wizard)
-        self.ui.btn_refresh.clicked.connect(self._update_players)
         self.ui.btn_start.clicked.connect(self.try_start)
+        self.ui.btn_refresh.clicked.connect(self.refresh)
         self.ui.btn_ready.clicked.connect(self.set_ready)
         self.ui.btn_exit.clicked.connect(self.exit_lobby)
 
@@ -157,6 +156,8 @@ class LobbyMenu(QMainWindow):
     def set_ready(self):
         self.parent.ready = not self.parent.ready
         self.parent.command_queue.put("UPDATE READY")
+    def refresh(self):
+        self.parent.command_queue.put("GET UPDATE")
 
     def exit_lobby(self):
         self.parent.command_queue.put("EXIT")
