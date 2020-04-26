@@ -60,71 +60,7 @@ def send_client_end_game(conn, won="YOU LOSE"):
 def process_lobby_request(conn, name, game):
     """ This method is used to process requests while in the lobby. """
 
-    valid_commands = [
-        "EXIT",
-        "GET UPDATE",
-        "UPDATE PROFESSION",
-        "UPDATE READY",
-        "TRY START"
-    ]
-
-    # To process a request, one must first hear the request.
-    cpkg = json.loads(conn.recv(4096).decode())
-
-    # After hearing the request, if the game has started, reply as such and move into the game.
-    if game.in_game:
-        print("{}: was in lobby when a game was already running.".format(name))
-        send_client_game(conn, name, game, "GAME START")
-        return False
-
-    request = cpkg["request"]
-    data = cpkg["data"]
-
-    # If the request was to exit the lobby, remove the player from the lobby and stop talking.
-    if request == "EXIT":
-        print("{}: is exiting the lobby.".format(name))
-        game.remove_player(name)
-        conn.shutdown(socket.SHUT_RDWR)
-        conn.close()
-        return False
-
-    # If the request is to get an update, send the client the lobby.
-    if request == "GET UPDATE":
-        print("{}: is getting an updated lobby.".format(name))
-        send_client_lobby(conn, name, game)
-
-    # If the request is to update the clients profession, do that and send back the lobby.
-    if request == "UPDATE PROFESSION":
-        print("{}: has updated their profession to {}.".format(name, data))
-        game.set_player_profession(name, data)
-        print("{}: is getting an updated lobby.".format(name))
-        send_client_lobby(conn, name, game)
-
-    # If the request is to update the client's ready state, do that and send back the lobby.
-    if request == "UPDATE READY":
-        print("{}: has updated their ready state to {}.".format(name, data))
-        game.set_player_ready(name, data)
-        print("{}: is getting an updated lobby.".format(name))
-        send_client_lobby(conn, name, game)
-
-    # If the request is to try and start the game...
-    if request == "TRY START":
-        print("{}: is trying to start the game.".format(name))
-        # Make sure all players are ready...
-        if game.try_start():
-            # And if the game was started, send the client the game and move to the game.
-            print("{}: tried to start the game and all players were ready.".format(name))
-            send_client_game(conn, name, game, "GAME START")
-            return False
-        # Otherwise send the client the lobby.
-        print("{}: tried to start the game but not all players were ready.".format(name))
-        send_client_lobby(conn, name, game)
-
-    # If we don't know what the request is, send the client an error.
-    if request not in valid_commands :
-        print("{}: sent an invalid request.".format(name))
-        send_client_error(conn, "INVALID REQUEST")
-    return True
+    
 
 def client_do_action(conn, name, game, data, status):
     """ This method is to break apart the DO ACTION request from
@@ -172,7 +108,7 @@ def process_game_request(conn, name, game):
     if not game.in_game:
         print("{}: was in game but the game has ended.")
         send_client_end_game(conn)
-        return False
+        return -1
 
     request = cpkg["request"]
     data = cpkg["data"]
@@ -183,7 +119,7 @@ def process_game_request(conn, name, game):
     if status == -1:
         print("{}: died and is leaving the game.".format(name))
         send_client_end_game(conn)
-        return False
+        return -1
 
     # If the request is to get an update, send them the game.
     if request == "GET UPDATE":
@@ -216,13 +152,13 @@ def process_game_request(conn, name, game):
             elif result == -1:
                 print("CLIENT: {} won the game!".format(name))
                 send_client_end_game(conn, "YOU WIN")
-                return False
+                return -1
 
     if request not in valid_commands:
         print("CLIENT: {} sent an invalid request.".format(name))
         send_client_error(conn, "INVALID REQUEST")
 
-    return True
+    return 0
 
 def client_thread(conn, name, game):
     """ This method is designed to run in a separate thread meant to handle
@@ -231,13 +167,76 @@ def client_thread(conn, name, game):
     print("CLIENT: Starting client threading.Thread for {}.".format(name))
     # Process lobby requests until the game starts.
     while True:
-        if not process_lobby_request(conn, name, game):
+        valid_commands = [
+            "EXIT",
+            "GET UPDATE",
+            "UPDATE PROFESSION",
+            "UPDATE READY",
+            "TRY START"
+        ]
+
+        # To process a request, one must first hear the request.
+        cpkg = json.loads(conn.recv(4096).decode())
+
+        # After hearing the request, if the game has started, reply as such and move into the game.
+        if game.in_game:
+            print("{}: was in lobby when a game was already running.".format(name))
+            send_client_game(conn, name, game, "GAME START")
             break
+
+        request = cpkg["request"]
+        data = cpkg["data"]
+
+        # If the request was to exit the lobby, remove the player from the lobby and stop talking.
+        if request == "EXIT":
+            print("{}: is exiting the lobby.".format(name))
+            game.remove_player(name)
+            conn.shutdown(socket.SHUT_RDWR)
+            conn.close()
+            return
+
+        # If the request is to get an update, send the client the lobby.
+        if request == "GET UPDATE":
+            print("{}: is getting an updated lobby.".format(name))
+            send_client_lobby(conn, name, game)
+
+        # If the request is to update the clients profession, do that and send back the lobby.
+        if request == "UPDATE PROFESSION":
+            print("{}: has updated their profession to {}.".format(name, data))
+            game.set_player_profession(name, data)
+            print("{}: is getting an updated lobby.".format(name))
+            send_client_lobby(conn, name, game)
+
+        # If the request is to update the client's ready state, do that and send back the lobby.
+        if request == "UPDATE READY":
+            print("{}: has updated their ready state to {}.".format(name, data))
+            game.set_player_ready(name, data)
+            print("{}: is getting an updated lobby.".format(name))
+            send_client_lobby(conn, name, game)
+
+        # If the request is to try and start the game...
+        if request == "TRY START":
+            print("{}: is trying to start the game.".format(name))
+            # Make sure all players are ready...
+            if game.try_start():
+                # And if the game was started, send the client the game and move to the game.
+                print("{}: tried to start the game and all players were ready.".format(name))
+                send_client_game(conn, name, game, "GAME START")
+                break
+            # Otherwise send the client the lobby.
+            print("{}: tried to start the game but not all players were ready.".format(name))
+            send_client_lobby(conn, name, game)
+
+        # If we don't know what the request is, send the client an error.
+        if request not in valid_commands :
+            print("{}: sent an invalid request.".format(name))
+            send_client_error(conn, "INVALID REQUEST")
+        continue
 
     print("CLIENT: {} has entered the game sequence.".format(name))
     # Process game requests until the game ends.
     while True:
-        if not process_game_request(conn, name, game):
+        if process_game_request(conn, name, game) == -1:
             break
 
 def start_listener(game):
