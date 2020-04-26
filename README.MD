@@ -4,9 +4,13 @@
 To run either client or server, please execute the appropriate executable or shell script depending on your operating systems.
 
 Client:
+
 start_client.exe
+
 ./start_client.sh
 
 Server:
+
 start_server.exe
+
 ./start_server.sh
