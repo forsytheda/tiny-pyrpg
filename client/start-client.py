@@ -69,6 +69,7 @@ class LobbyMenu(QMainWindow):
         self.parent = parent
         self.ui = Ui_TPRLobbyMenu()
         self.ui.setupUi(self)
+        self.setWindowFlag(QtCore.Qt.WindowCloseButtonHint, False)
         self.ui.lbl_connected_ip.setText(self.parent.connected_ip)
         self.ui.btn_select_cleric.clicked.connect(self.set_prof_cleric)
         self.ui.btn_select_monk.clicked.connect(self.set_prof_monk)
@@ -400,7 +401,6 @@ class ClientSocket:
 
             ## Update Ready Status
             elif command == "UPDATE READY":
-                print(self.parent.player["profession"])
                 if self.parent.player["profession"] == "None":
                     self.parent.signal.sig_with_strs.emit("Must select a Profession before readying.")
                 else:                
@@ -487,12 +487,12 @@ class ClientSocket:
                 data["data"] = ""
                 data = json.dumps(data).encode()
                 self.sock.sendall(data)
-                time.sleep(4)
+                time.sleep(1)
                 self.sock.shutdown(socket.SHUT_RDWR)
                 self.sock.close()
                 self.parent.signal.sig_exit.emit()
                 print("Exiting")
-                time.sleep(2)
+                time.sleep(1)
                 exit(0)
             else:
                 pass
@@ -633,7 +633,7 @@ class Client:
         sys.exit()
 
     def quit_app(self):
-        time.sleep(5)
+        time.sleep(2)
         self.window.hide()
         del self.window        
         self.app.quit()
