@@ -138,7 +138,7 @@ class Game:
         self.players[self.active_player].process_statuses()
 
         while not self.players[self.active_player].is_alive:
-            self.active_player = self.active_player + 1 % len(self.players)
+            self.active_player = (self.active_player + 1) % len(self.players)
         self.players[self.active_player].process_statuses()
         num_alive = 0
         for player in self.players:
