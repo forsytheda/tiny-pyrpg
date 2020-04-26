@@ -69,6 +69,7 @@ class LobbyMenu(QMainWindow):
         self.parent = parent
         self.ui = Ui_TPRLobbyMenu()
         self.ui.setupUi(self)
+        self.setWindowFlag(QtCore.Qt.WindowCloseButtonHint, False)
         self.ui.lbl_connected_ip.setText(self.parent.connected_ip)
         self.ui.btn_select_cleric.clicked.connect(self.set_prof_cleric)
         self.ui.btn_select_monk.clicked.connect(self.set_prof_monk)
@@ -156,7 +157,7 @@ class LobbyMenu(QMainWindow):
         self.parent.command_queue.put("TRY START")
 
     def set_ready(self):
-        self.parent.ready = not self.parent.ready
+        #self.parent.ready = not self.parent.ready
         self.parent.command_queue.put("UPDATE READY")
     def refresh(self):
         self.parent.command_queue.put("GET UPDATE")
@@ -164,7 +165,7 @@ class LobbyMenu(QMainWindow):
     def exit_lobby(self):
         self.parent.command_queue.put("EXIT")
         self.parent.client_socket_thread.join()
-        self.parent.go_to_main_menu()
+        #self.parent.go_to_main_menu()
 
 #################  GAME MENU  ########################
 class GameMenu(QMainWindow):
@@ -290,14 +291,11 @@ class GameMenu(QMainWindow):
     def actionSelect(self):
         pass
 
-
-        
-
-
 class MySignal(QtCore.QObject):
     sig_no_args = QtCore.pyqtSignal()
     sig_with_strs = QtCore.pyqtSignal(str)
     sig_quit = QtCore.pyqtSignal()
+    sig_exit = QtCore.pyqtSignal()
 
 #####################################    Start Client Socket    ###################################
 class ClientSocket:
@@ -403,26 +401,30 @@ class ClientSocket:
 
             ## Update Ready Status
             elif command == "UPDATE READY":
-                data = {}
-                data["request"] = "UPDATE READY"
-                data["data"] = self.parent.ready
-                data = json.dumps(data).encode()
-                self.sock.sendall(data)
-                response = self.sock.recv(4096)
-                response = json.loads(response.decode())
-                game = response["data"]
-                response = response["response"]
-                if response == "GAME START":
-                    self.parent.signal.sig_no_args.emit()
-                    #self.parent.window._update_players(game)
-                    print("Game Starting")
-                    break
-                if response != "LOBBY DATA":
-                    msg = game
-                    self.parent.signal.sig_with_strs.emit(msg)
-                    continue                
-                self.parent.window._update_players(game)
-                print("Ready state is now {}".format(self.parent.ready))
+                if self.parent.player["profession"] == "None":
+                    self.parent.signal.sig_with_strs.emit("Must select a Profession before readying.")
+                else:                
+                    data = {}
+                    data["request"] = "UPDATE READY"
+                    data["data"] = not self.parent.ready
+                    data = json.dumps(data).encode()
+                    self.sock.sendall(data)
+                    response = self.sock.recv(4096)
+                    response = json.loads(response.decode())
+                    game = response["data"]
+                    response = response["response"]
+                    if response == "GAME START":
+                        self.parent.signal.sig_no_args.emit()
+                        #self.parent.window._update_players(game)
+                        print("Game Starting")
+                        break
+                    if response != "LOBBY DATA":
+                        msg = game
+                        self.parent.signal.sig_with_strs.emit(msg)
+                        continue
+                    self.parent.ready = not self.parent.ready            
+                    self.parent.window._update_players(game)
+                    print("Ready state is now {}".format(self.parent.ready))
             
             ## Update Lobby
             elif command == "GET UPDATE":
@@ -485,9 +487,13 @@ class ClientSocket:
                 data["data"] = ""
                 data = json.dumps(data).encode()
                 self.sock.sendall(data)
+                time.sleep(1)
                 self.sock.shutdown(socket.SHUT_RDWR)
                 self.sock.close()
+                self.parent.signal.sig_exit.emit()
                 print("Exiting")
+                time.sleep(1)
+                exit(0)
             else:
                 pass
         
@@ -514,6 +520,7 @@ class ClientSocket:
                 if response == "END GAME":
                     msg = game
                     self.parent.signal.sig_with_strs.emit(msg)
+                    time.sleep(1)
                     self.sock.shutdown(socket.SHUT_RDWR)
                     self.sock.close()
                     self.parent.signal.sig_quit.emit()
@@ -543,6 +550,7 @@ class ClientSocket:
                 if response == "END GAME":
                     msg = game
                     self.parent.signal.sig_with_strs.emit(msg)
+                    time.sleep(1)
                     self.sock.shutdown(socket.SHUT_RDWR)
                     self.sock.close()
                     self.parent.signal.sig_quit.emit()
@@ -588,6 +596,7 @@ class Client:
         self.signal.sig_no_args.connect(self.go_to_game)
         self.signal.sig_with_strs.connect(self.errorMessage)
         self.signal.sig_quit.connect(self.quit_app)
+        self.signal.sig_exit.connect(self.exit_app)
         self.app = QApplication(sys.argv)
         self.window = MainMenu(self)
         self.window.show()
@@ -617,8 +626,14 @@ class Client:
         self.window = GameMenu(self)
         self.window.show()
     
+    def exit_app(self):
+        self.window.hide()
+        del self.window        
+        self.app.quit()
+        sys.exit()
+
     def quit_app(self):
-        time.sleep(5)
+        time.sleep(2)
         self.window.hide()
         del self.window        
         self.app.quit()
