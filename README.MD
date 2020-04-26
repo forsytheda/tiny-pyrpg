@@ -3,6 +3,8 @@
 
 To run either client or server, please execute the appropriate executable or shell script depending on your operating systems.
 
+If you are running this on linux, you must have installed the PyQt5 python module using pip.
+
 Client:
 
 start_client.exe
