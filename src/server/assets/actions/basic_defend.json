@@ -1,0 +1,21 @@
+{
+    "TPR-Type": "action",
+    "name": "basic_defend",
+    "costs": 
+    {
+        "ap": 2,
+        "mana": 0
+    },
+    "modifiers": [],
+    "statuses": 
+    [
+        {
+            "modifier": {
+                "attribute": "hp",
+                "change": -4
+            },
+            "duration": 1,
+            "duration_delta": 0
+        }
+    ]
+}

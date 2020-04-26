@@ -1,0 +1,15 @@
+{
+    "TPR-Type": "profession",
+    "name": "Warrior",
+    "description": "A brawny soul with the strength of a bear.",
+    "base_attributes": {
+        "base_hp": 120,
+        "base_ap": 5,
+        "base_mana": 30
+    },
+    "actions": [
+        "basic_attack",
+        "basic_defend",
+        "basic_rest"
+    ]
+}
