@@ -47,7 +47,6 @@ class MainMenu(QMainWindow):
             self.parent.username = username
             self.parent.ready = False
             self.parent.command_queue = Queue()
-            self.parent.response_queue = Queue()
             t = threading.Thread(target=startClientSocket, args=(self.parent,))
             t.daemon = True
             self.parent.client_socket_thread = t
@@ -355,16 +354,6 @@ class Client:
         self.window = MainMenu(self)
         self.window.show()
         self.app.exec_()
-
-    def start_response_queue(self):
-        print("Starting response queue")
-        while True:
-            command, data = self.response_queue.get()
-            print("Received command: {}".format(command))
-            if command == "UPDATE GAME":
-                self.window._update_players(data)
-            else:
-                print("Unknown command")
 
     def go_to_main_menu(self):
         self.window.hide()
