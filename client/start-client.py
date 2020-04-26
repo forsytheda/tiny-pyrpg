@@ -73,6 +73,7 @@ class LobbyMenu(QMainWindow):
         self.ui.btn_select_rogue.clicked.connect(self.set_prof_rogue)
         self.ui.btn_select_warrior.clicked.connect(self.set_prof_warrior)
         self.ui.btn_select_wizard.clicked.connect(self.set_prof_wizard)
+        self.ui.btn_refresh.clicked.connect(self._update_players)
         self.ui.btn_start.clicked.connect(self.try_start)
         self.ui.btn_ready.clicked.connect(self.set_ready)
         self.ui.btn_exit.clicked.connect(self.exit_lobby)
