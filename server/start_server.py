@@ -58,6 +58,14 @@ def send_client_end_game(conn, won="YOU LOSE"):
 def process_lobby_request(conn, name, game):
     """ This method is used to process requests while in the lobby. """
 
+    valid_commands = [
+        "EXIT",
+        "GET UPDATE",
+        "UPDATE PROFESSION",
+        "UPDATE READY",
+        "TRY START"
+    ]
+
     # To process a request, one must first hear the request.
     cpkg = json.loads(conn.recv(4096).decode())
 
@@ -111,7 +119,7 @@ def process_lobby_request(conn, name, game):
         send_client_lobby(conn, name, game)
 
     # If we don't know what the request is, send the client an error.
-    else:
+    if request not in valid_commands :
         print("{}: sent an invalid request.".format(name))
         send_client_error(conn, "INVALID REQUEST")
     return True
@@ -277,7 +285,7 @@ def start_listener(game):
         # Finally, if there is not error with the action, the player was successfully joined
         # and a client thread is created to handle client-server communication from here.
         print("LOBBY: Player {} joined the lobby from connection {}.".format(name, addr))
-        send_client_lobby(conn, name, "JOIN ACCEPT")
+        send_client_lobby(conn, name, game, "JOIN ACCEPT")
         c_thread = threading.Thread(target=client_thread, args=(conn, name, game))
         c_thread.daemon = True
         c_thread.start()
