@@ -12,7 +12,7 @@
         {
             "modifier": {
                 "attribute": "hp",
-                "change": 4
+                "change": -4
             },
             "duration": 1,
             "duration_delta": 0

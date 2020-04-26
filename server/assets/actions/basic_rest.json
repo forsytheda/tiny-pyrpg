@@ -9,18 +9,18 @@
     "modifiers": [
         {
             "attribute": "hp",
-            "change": 6
+            "change": -6
         },
         {
             "attribute": "mana",
-            "change": 6
+            "change": -6
         }
     ],
     "statuses": [
         {
             "modifier": {
                 "attribute": "hp",
-                "change": 2
+                "change": -2
             },
             "duration": 5,
             "duration_delta": 0
@@ -28,7 +28,7 @@
         {
             "modifier": {
                 "attribute": "mana",
-                "change": 2
+                "change": -2
             },
             "duration": 5,
             "duration_delta": 0
