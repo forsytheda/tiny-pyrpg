@@ -134,11 +134,12 @@ class Game:
         print("Active player before cycle: {}".format(self.active_player))
         self.active_player = (self.active_player + 1) % len(self.players)
         print("Active player after cycle: {}".format(self.active_player))
+        self.players[self.active_player].attributes["ap"] = self.players[self.active_player].attributes["max_ap"]
         self.players[self.active_player].process_statuses()
 
         while not self.players[self.active_player].is_alive:
             self.active_player = self.active_player + 1 % len(self.players)
-            self.players[self.active_player].process_statuses()
+        self.players[self.active_player].process_statuses()
         num_alive = 0
         for player in self.players:
             if player.is_alive:
