@@ -341,7 +341,7 @@ class ClientSocket:
                 data["data"] = ""
                 data = json.dumps(data).encode()
                 self.sock.sendall(data)
-                self.sock.shutdown(socket.SHUT_RDWR)(socket.SHUT_RDWR)
+                self.sock.shutdown(socket.SHUT_RDWR)
                 self.sock.close()
                 print("Exiting")
                 break

@@ -63,19 +63,23 @@ def client_thread(conn, name):
             break
         request = cpkg["request"]
         data = cpkg["data"]
+
         if request == "GET UPDATE":
             print("CLIENT: {} is getting an updated lobby.".format(name))
             send_client_lobby(conn, name)
+
         elif request == "UPDATE PROFESSION":
             print("CLIENT: Updating {}'s profession to {}.".format(name, data))
             game.set_player_profession(name, data)
             print("CLIENT: {} is getting an updated lobby.".format(name))
             send_client_lobby(conn, name)
+
         elif request == "UPDATE READY":
             print("CLIENT: Updating {}'s ready state to {}.".format(name, data))
             game.set_player_ready(name, data)
             print("CLIENT: {} is getting an updated lobby.".format(name))
             send_client_lobby(conn, name)
+
         elif request == "TRY START":
             print("CLIENT: {} is trying to start the game.".format(name))
             if game.try_start():
@@ -85,12 +89,14 @@ def client_thread(conn, name):
             else:
                 print("CLIENT: {} tried to start the game but not all players were ready.".format(name))
                 send_client_lobby(conn, name)
+
         elif request == "EXIT":
             print("CLIENT: {} is exiting the lobby.".format(name))
             game.remove_player(name)
             conn.shutdown(SHUT_RDWR)
             conn.close()
             return
+            
         else:
             print("CLIENT: {} send an invalid request.".format(name))
             send_client_error(conn, "INVALID REQUEST")
