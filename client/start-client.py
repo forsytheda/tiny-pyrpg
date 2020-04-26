@@ -47,7 +47,6 @@ class MainMenu(QMainWindow):
             self.parent.username = username
             self.parent.ready = False
             self.parent.command_queue = Queue()
-            self.parent.response_queue = Queue()
             t = threading.Thread(target=startClientSocket, args=(self.parent,))
             t.daemon = True
             self.parent.client_socket_thread = t
@@ -66,7 +65,6 @@ class LobbyMenu(QMainWindow):
         self.ui = Ui_TPRLobbyMenu()
         self.ui.setupUi(self)
         self.ui.lbl_connected_ip.setText(self.parent.connected_ip)
-
         self.ui.btn_select_cleric.clicked.connect(self.set_prof_cleric)
         self.ui.btn_select_monk.clicked.connect(self.set_prof_monk)
         self.ui.btn_select_paladin.clicked.connect(self.set_prof_paladin)
@@ -74,6 +72,7 @@ class LobbyMenu(QMainWindow):
         self.ui.btn_select_warrior.clicked.connect(self.set_prof_warrior)
         self.ui.btn_select_wizard.clicked.connect(self.set_prof_wizard)
         self.ui.btn_start.clicked.connect(self.try_start)
+        self.ui.btn_refresh.clicked.connect(self.refresh)
         self.ui.btn_ready.clicked.connect(self.set_ready)
         self.ui.btn_exit.clicked.connect(self.exit_lobby)
 
@@ -109,21 +108,31 @@ class LobbyMenu(QMainWindow):
             labels["profession"] = self.ui.lbl_p6_profession
             labels["profession_dsc"] = self.ui.lbl_p6_profession_dsc
             labels["ready"] = self.ui.lbl_p6_ready
+        return labels
 
     def _update_players(self, game):
         lobby = game["lobby"]
-        for number, player in lobby.items():
-            labels = self._get_player_labels(number)
-            labels["name"].setText(player["name"] if not player["name"] == "" else "Empty")
-            labels["profession"].setText(player["profession"] if not player["profession"] == "" else "None")
-            labels["profession_dsc"].setText(player["profession_dsc"])
-            labels["ready"].setText("Yes" if player["ready"] == True else "No")
+        print(lobby)
+        for player in lobby.keys():
+        #for player in lobby["game"].keys():
+            print(player)
+            labels = self._get_player_labels(player)
+            labels["name"].setText(lobby[player]["name"] if not lobby[player]["name"] == "" else "Empty")
+            labels["profession"].setText(lobby[player]["profession"] if not lobby[player]["profession"] == "" else "None")
+            labels["profession_dsc"].setText(lobby[player]["profession_description"])
+            labels["ready"].setText("Yes" if lobby[player]["ready"] == True else "No")
+            if lobby[player]["ready"] == True:
+                labels["ready"].setStyleSheet('color: green')
+            else:
+                labels["ready"].setStyleSheet('color: red')
 
     def _set_profession(self, prof):
         if self.parent.player["profession"] != prof:
             self.parent.player["profession"] = prof
             self.parent.command_queue.put("UPDATE PROFESSION")
-
+    def readonly(self):
+        print("This Ran")
+        self.ui.btn_start.setEnabled(False)
     def set_prof_warrior(self):
         self._set_profession("Warrior")
 
@@ -148,6 +157,8 @@ class LobbyMenu(QMainWindow):
     def set_ready(self):
         self.parent.ready = not self.parent.ready
         self.parent.command_queue.put("UPDATE READY")
+    def refresh(self):
+        self.parent.command_queue.put("GET UPDATE")
 
     def exit_lobby(self):
         self.parent.command_queue.put("EXIT")
@@ -171,7 +182,7 @@ class ClientSocket:
         print("Starting Socket")
         self.sock.connect((self.parent.connected_ip, 52000))
         self.sock.send("Tiny-PyRPG Client".encode())
-        data = self.sock.recv(2048)
+        data = self.sock.recv(4096)
 
         if not data or data != "Tiny-PyRPG Server".encode():
             self.sock.shutdown(socket.SHUT_RDWR)()
@@ -184,13 +195,14 @@ class ClientSocket:
         data = {}
         data["request"] = "JOIN LOBBY"
         data["data"] = self.parent.username
-        data = json.dumps[data].encode()
+        data = json.dumps(data).encode()
         self.sock.sendall(data)
 
-        response = self.sock.recv(2048)
+        response = self.sock.recv(4096)
         response = json.loads(response)
         data = response["data"]
         response = response["response"]
+        print("test 4")  
 
         if response == "ERROR":
             if data == "LOBBY FULL":
@@ -209,12 +221,34 @@ class ClientSocket:
                 self.sock.close()
                 self.parent.go_to_main_menu()
                 return
+            elif data == "GAME STARTED":
+                emsg = QErrorMessage()
+                emsg.setWindowTitle("Tiny-PyRPG | Error: Game Started")
+                emsg.showMessage("Error: the lobby you tried to join has already begun a match. Exiting.")
+                self.sock.shutdown(socket.SHUT_RDWR)
+                self.sock.close()
+                self.parent.go_to_main_menu()
+                return
         elif response == "JOIN ACCEPT":
             pnum = data["player-number"]
             lobby = data["lobby"]
+            if pnum == 1:
+                self.parent.player = lobby["p1"]
+            elif pnum == 2:
+                self.parent.player = lobby["p2"]
+            elif pnum == 3:
+                self.parent.player = lobby["p3"]
+            elif pnum == 4:
+                self.parent.player = lobby["p4"]
+            elif pnum == 5:
+                self.parent.player = lobby["p5"]
+            elif pnum == 6:
+                self.parent.player = lobby["p6"]
             
-            
-        self.parent.response_queue.put(("UPDATE GAME", game))
+        print("test 3")                
+        #self.parent.command_queue.put(("GET UPDATE", lobby))
+        self.parent.command_queue.put("GET UPDATE")
+        print("test 6")
 
         while True:
             command = self.parent.command_queue.get()
@@ -224,34 +258,58 @@ class ClientSocket:
                 data["data"] = self.parent.player["profession"]
                 data = json.dumps(data).encode()
                 self.sock.sendall(data)
-                response = self.sock.recv(2048)
+                response = self.sock.recv(4096)
                 response = json.loads(response.decode())
-                game = response["game"]
+                game = response["data"]
                 response = response["response"]
-                if response != "VALID":
+                if response != "LOBBY DATA":
                     emsg = QErrorMessage()
                     emsg.setWindowTitle("Tiny-PyRPG | Error: Command Invalid")
                     emsg.showMessage("Error: the action you just tried to do is broken. Please contact the developer.")
-                    continue
+                    continue               
                 self.parent.window._update_players(game)
-                print("Updating profession to {}".format(self.parent.player["profession"]))
+                
             elif command == "UPDATE READY":
                 data = {}
                 data["request"] = "UPDATE READY"
                 data["data"] = self.parent.ready
                 data = json.dumps(data).encode()
                 self.sock.sendall(data)
-                response = self.sock.recv(2048)
+                response = self.sock.recv(4096)
                 response = json.loads(response.decode())
-                game = response["game"]
+                game = response["data"]
                 response = response["response"]
-                if response != "VALID":
+                if response != "LOBBY DATA":
                     emsg = QErrorMessage()
                     emsg.setWindowTitle("Tiny-PyRPG | Error: Command Invalid")
                     emsg.showMessage("Error: the action you just tried to do is broken. Please contact the developer.")
                     continue
                 self.parent.window._update_players(game)
                 print("Ready state is now {}".format(self.parent.ready))
+
+            elif command == "GET UPDATE":
+                data = {}
+                data["request"] = "GET UPDATE"
+                data["data"] = None
+                data = json.dumps(data).encode()
+                self.sock.sendall(data)
+                print("test 7")
+                response = self.sock.recv(4096)
+                response = json.loads(response.decode())
+                print("test 8")
+                game = response["data"]
+                response = response["response"]
+                pn = game["player-number"]
+                if int(pn)!= 1:
+                    self.parent.window.readonly()
+                if response != "LOBBY DATA":
+                    emsg = QErrorMessage()
+                    emsg.setWindowTitle("Tiny-PyRPG | Error: Command Invalid")
+                    emsg.showMessage("Error: the action you just tried to do is broken. Please contact the developer.")
+                    continue
+                self.parent.window._update_players(game)
+                print("Lobby Refreshed")
+                
             elif command == "TRY START":
                 print("Requesting game start")
                 data = {}
@@ -259,7 +317,7 @@ class ClientSocket:
                 data["data"] = ""
                 data = json.dumps(data).encode()
                 self.sock.sendall(data)
-                response = self.sock.recv(2048)
+                response = self.sock.recv(4096)
                 response = json.loads(response.decode())
                 game = response["game"]
                 response = response["response"]
@@ -276,6 +334,7 @@ class ClientSocket:
                     emsg.setWindowTitle("Tiny-PyRPG | Error: Command Invalid")
                     emsg.showMessage("Error: the action you just tried to do is broken. Please contact the developer.")
                     continue
+                
             elif command == "EXIT":
                 data = {}
                 data["request"] = "EXIT"
@@ -295,16 +354,6 @@ class Client:
         self.window = MainMenu(self)
         self.window.show()
         self.app.exec_()
-
-    def start_response_queue(self):
-        print("Starting response queue")
-        while True:
-            command, data = self.response_queue.get()
-            print("Received command: {}".format(command))
-            if command == "UPDATE GAME":
-                self.window._update_players(data)
-            else:
-                print("Unknown command")
 
     def go_to_main_menu(self):
         self.window.hide()
