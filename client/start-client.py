@@ -4,6 +4,7 @@ import json
 import socket
 import sys
 import threading
+import time
 from queue import Queue
 
 # PyQt5 imports
@@ -12,6 +13,7 @@ from PyQt5.QtWidgets import QMainWindow
 from PyQt5.QtWidgets import QPushButton
 from PyQt5.QtWidgets import QLineEdit
 from PyQt5.QtWidgets import QErrorMessage
+from PyQt5 import QtCore
 
 # UI imports
 from gui.main_menu import Ui_TPRMainMenu
@@ -58,6 +60,7 @@ class MainMenu(QMainWindow):
             emsg.showMessage("Error: IP address invalid. Please use a valid IPv4 address.")
             return
 
+##################### LOBBY MENU  ##########################
 class LobbyMenu(QMainWindow):
     def __init__(self, parent):
         super(LobbyMenu, self).__init__()
@@ -112,10 +115,7 @@ class LobbyMenu(QMainWindow):
 
     def _update_players(self, game):
         lobby = game["lobby"]
-        #print(lobby)
         for player in lobby.keys():
-        #for player in lobby["game"].keys():
-            #print(player)
             labels = self._get_player_labels(player)
             labels["name"].setText(lobby[player]["name"] if not lobby[player]["name"] == "" else "Empty")
             labels["profession"].setText(lobby[player]["profession"] if not lobby[player]["profession"] == "" else "None")
@@ -131,7 +131,6 @@ class LobbyMenu(QMainWindow):
             self.parent.player["profession"] = prof
             self.parent.command_queue.put("UPDATE PROFESSION")
     def readonly(self):
-        print("This Ran")
         self.ui.btn_start.setEnabled(False)
     def set_prof_warrior(self):
         self._set_profession("Warrior")
@@ -165,13 +164,123 @@ class LobbyMenu(QMainWindow):
         self.parent.client_socket_thread.join()
         self.parent.go_to_main_menu()
 
+#################  GAME MENU  ########################
 class GameMenu(QMainWindow):
     def __init__(self, parent):
         super(GameMenu, self).__init__()
         self.parent = parent
         self.ui = Ui_TPRGameMenu()
         self.ui.setupUi(self)
+        self.target = "P1"
+        #Button name is odd should be refresh i guess
+        self.ui.btn_action_info.clicked.connect(self.refresh)
+        self.ui.btn_end_turn.clicked.connect(self.endTurn)
+        self.ui.btn_do_selected_action.clicked.connect(self.action)
+        self.ui.btn_p1_select.clicked.connect(self.p1Select)
+        self.ui.btn_p2_select.clicked.connect(self.p2Select)
+        self.ui.btn_p3_select.clicked.connect(self.p3Select)
+        self.ui.btn_p4_select.clicked.connect(self.p4Select)
+        self.ui.btn_p5_select.clicked.connect(self.p5Select)
+        self.ui.btn_p6_select.clicked.connect(self.p6Select)
+        self.ui.list_actions.itemClicked.connect(self.actionSelect)
 
+
+    
+    def _get_player_labels(self, number):
+        labels = {}
+        if number == "p1":
+            labels["name"] = self.ui.lbl_p1_name
+            labels["profession"] = self.ui.lbl_p1_profession
+            labels["hp"] = self.ui.lbl_p1_hp
+            labels["ap"] = self.ui.lbl_p1_ap
+            labels["mana"] = self.ui.lbl_p1_mana
+        elif number == "p2":
+            labels["name"] = self.ui.lbl_p2_name
+            labels["profession"] = self.ui.lbl_p2_profession
+            labels["hp"] = self.ui.lbl_p2_hp
+            labels["ap"] = self.ui.lbl_p2_ap
+            labels["mana"] = self.ui.lbl_p2_mana
+        elif number == "p3":
+            labels["name"] = self.ui.lbl_p3_name
+            labels["profession"] = self.ui.lbl_p3_profession
+            labels["hp"] = self.ui.lbl_p3_hp
+            labels["ap"] = self.ui.lbl_p3_ap
+            labels["mana"] = self.ui.lbl_p3_mana
+        elif number == "p4":
+            labels["name"] = self.ui.lbl_p4_name
+            labels["profession"] = self.ui.lbl_p4_profession
+            labels["hp"] = self.ui.lbl_p4_hp
+            labels["ap"] = self.ui.lbl_p4_ap
+            labels["mana"] = self.ui.lbl_p4_mana
+        elif number == "p5":
+            labels["name"] = self.ui.lbl_p5_name
+            labels["profession"] = self.ui.lbl_p5_profession
+            labels["hp"] = self.ui.lbl_p5_hp
+            labels["ap"] = self.ui.lbl_p5_ap
+            labels["mana"] = self.ui.lbl_p5_mana
+        elif number == "p6":
+            labels["name"] = self.ui.lbl_p6_name
+            labels["profession"] = self.ui.lbl_p6_profession
+            labels["hp"] = self.ui.lbl_p6_hp
+            labels["ap"] = self.ui.lbl_p6_ap
+            labels["mana"] = self.ui.lbl_p6_mana
+        return labels
+    
+    def _update_players(self, game):
+        self.ui.list_actions.clear()
+        actions = game["actions"]
+        gamedata = game["game"]
+        turnnum = gamedata["turn-number"]
+        actplayer = gamedata["active-player"]       
+        playerdata = gamedata["players"]
+        for player in playerdata.keys():
+            labels = self._get_player_labels(player)
+            labels["name"].setText(playerdata[player]["name"] if not playerdata[player]["name"] == "" else "Empty")
+            labels["profession"].setText(playerdata[player]["profession"] if not playerdata[player]["profession"] == "" else "None")
+            labels["hp"].setText("{0}/{1}".format(playerdata[player]["hp"][0], playerdata[player]["hp"][1]))
+            labels["ap"].setText("{0}/{1}".format(playerdata[player]["ap"][0], playerdata[player]["ap"][1]))
+            labels["mana"].setText("{0}/{1}".format(playerdata[player]["mana"][0], playerdata[player]["mana"][1]))
+        self.ui.lbl_turn_number.setText(str(turnnum))
+        self.ui.lbl_active_player_number.setText(str(actplayer))
+        for item in actions:
+            self.ui.list_actions.addItem(item)
+
+    def refresh(self):
+        self.parent.command_queue.put("GET UPDATE")
+    def endTurn(self):
+        self.parent.command_queue.put("END TURN")
+    def action(self):
+        self.parent.command_queue.put("DO ACTION")
+    def p1Select(self):
+        self.target = "P1"
+        self.iu.lbl_selected_target.setText(self.target)
+    def p2Select(self):
+        self.target = "P2"
+        self.iu.lbl_selected_target.setText(self.target)
+    def p3Select(self):
+        self.target = "P3"
+        self.iu.lbl_selected_target.setText(self.target)
+    def p4Select(self):
+        self.target = "P4"
+        self.iu.lbl_selected_target.setText(self.target)
+    def p5Select(self):
+        self.target = "P5"
+        self.iu.lbl_selected_target.setText(self.target)
+    def p6Select(self):
+        self.target = "P6"
+        self.iu.lbl_selected_target.setText(self.target)
+    def actionSelect(self):
+        pass
+
+
+        
+
+
+class MySignal(QtCore.QObject):
+    sig_no_args = QtCore.pyqtSignal()
+    sig_with_str = QtCore.pyqtSignal(str)
+
+#####################################    Start Client Socket    ###################################
 class ClientSocket:
     def __init__(self, parent):
         print("Creating Socket")
@@ -201,8 +310,7 @@ class ClientSocket:
         response = self.sock.recv(4096)
         response = json.loads(response)
         data = response["data"]
-        response = response["response"]
-        print("test 4")  
+        response = response["response"] 
 
         if response == "ERROR":
             if data == "LOBBY FULL":
@@ -231,7 +339,10 @@ class ClientSocket:
                 return
         elif response == "JOIN ACCEPT":
             pnum = data["player-number"]
+            print("test1")
             lobby = data["lobby"]
+            print(lobby)
+            print("test2")
             if pnum == 1:
                 self.parent.player = lobby["p1"]
             elif pnum == 2:
@@ -244,14 +355,15 @@ class ClientSocket:
                 self.parent.player = lobby["p5"]
             elif pnum == 6:
                 self.parent.player = lobby["p6"]
-            
-        print("test 3")                
-        #self.parent.command_queue.put(("GET UPDATE", lobby))
+                            
         self.parent.command_queue.put("GET UPDATE")
-        print("test 6")
 
+
+#################################  LOBBY LOOP    #######################################
         while True:
             command = self.parent.command_queue.get()
+
+            ##  Update Profession
             if command == "UPDATE PROFESSION":
                 data = {}
                 data["request"] = "UPDATE PROFESSION"
@@ -262,13 +374,19 @@ class ClientSocket:
                 response = json.loads(response.decode())
                 game = response["data"]
                 response = response["response"]
+                if response == "GAME START":
+                    self.parent.signal.sig_no_args.emit()
+                    #self.parent.window._update_players(game)
+                    print("Game Starting")
+                    break
                 if response != "LOBBY DATA":
                     emsg = QErrorMessage()
                     emsg.setWindowTitle("Tiny-PyRPG | Error: Command Invalid")
                     emsg.showMessage("Error: the action you just tried to do is broken. Please contact the developer.")
                     continue               
                 self.parent.window._update_players(game)
-                
+
+            ## Update Ready Status
             elif command == "UPDATE READY":
                 data = {}
                 data["request"] = "UPDATE READY"
@@ -279,26 +397,35 @@ class ClientSocket:
                 response = json.loads(response.decode())
                 game = response["data"]
                 response = response["response"]
+                if response == "GAME START":
+                    self.parent.signal.sig_no_args.emit()
+                    #self.parent.window._update_players(game)
+                    print("Game Starting")
+                    break
                 if response != "LOBBY DATA":
                     emsg = QErrorMessage()
                     emsg.setWindowTitle("Tiny-PyRPG | Error: Command Invalid")
                     emsg.showMessage("Error: the action you just tried to do is broken. Please contact the developer.")
-                    continue
+                    continue                
                 self.parent.window._update_players(game)
                 print("Ready state is now {}".format(self.parent.ready))
-
+            
+            ## Update Lobby
             elif command == "GET UPDATE":
                 data = {}
                 data["request"] = "GET UPDATE"
                 data["data"] = None
                 data = json.dumps(data).encode()
                 self.sock.sendall(data)
-                print("test 7")
                 response = self.sock.recv(4096)
                 response = json.loads(response.decode())
-                print("test 8")
                 game = response["data"]
                 response = response["response"]
+                if response == "GAME START":
+                    self.parent.signal.sig_no_args.emit()
+                    #self.parent.window._update_players(game)
+                    print("Game Starting")
+                    break
                 pn = game["player-number"]
                 if int(pn)!= 1:
                     self.parent.window.readonly()
@@ -309,7 +436,8 @@ class ClientSocket:
                     continue
                 self.parent.window._update_players(game)
                 print("Lobby Refreshed")
-                
+            
+            ## Try to start game
             elif command == "TRY START":
                 print("Requesting game start")
                 data = {}
@@ -319,14 +447,14 @@ class ClientSocket:
                 self.sock.sendall(data)
                 response = self.sock.recv(4096)
                 response = json.loads(response.decode())
-                game = response["game"]
-                response = response["response"]
-                if response == "START":
-                    self.parent.go_to_game()
-                    self.parent._update_players(game)
+                resp = response["response"]
+                game = response["data"]
+                if resp == "GAME START":
+                    self.parent.signal.sig_no_args.emit()
+                    #self.parent.window._update_players(game)
                     print("Game Starting")
-                    continue
-                elif response == "NOT READY":
+                    break
+                elif resp == "LOBBY DATA":
                     print("There are players who are not ready.")
                     continue
                 else:
@@ -334,7 +462,8 @@ class ClientSocket:
                     emsg.setWindowTitle("Tiny-PyRPG | Error: Command Invalid")
                     emsg.showMessage("Error: the action you just tried to do is broken. Please contact the developer.")
                     continue
-                
+            
+            #Exit Lobby
             elif command == "EXIT":
                 data = {}
                 data["request"] = "EXIT"
@@ -344,16 +473,73 @@ class ClientSocket:
                 self.sock.shutdown(socket.SHUT_RDWR)
                 self.sock.close()
                 print("Exiting")
-                break
+                #quit()
             else:
                 pass
+        
+##################################   Game Loop    #################################
+        time.sleep(1)
+        self.parent.window._update_players(game)
+        while True:
+            command = self.parent.command_queue.get()
+
+####################### Do Action  #################
+            if command == "DO ACTION":
+                target = self.parent.window.target
+                #action = self.parent.windown.
+                data = {}
+                data["request"] = "DO ACTION"
+                data["data"] = None
+                print(data)
+                data = json.dumps(data).encode()
+                self.sock.sendall(data)
+                response = self.sock.recv(4096)
+                response = json.loads(response.decode())
+                game = response["data"]
+                response = response["response"]
+                if response != "GAME DATA":
+                    emsg = QErrorMessage()
+                    emsg.setWindowTitle("Tiny-PyRPG | Error: Command Invalid")
+                    emsg.showMessage("Error: the action you just tried to do is broken. Please contact the developer.")
+                    continue
+                self.parent.window._update_players(game)
+                print("Lobby Refreshed")
+        
+###################### Get Update  #################    
+            elif command == "GET UPDATE":
+                data = {}
+                data["request"] = "GET UPDATE"
+                data["data"] = None
+                print(data)
+                data = json.dumps(data).encode()
+                self.sock.sendall(data)
+                response = self.sock.recv(4096)
+                response = json.loads(response.decode())
+                game = response["data"]
+                response = response["response"]
+                if response != "GAME DATA":
+                    emsg = QErrorMessage()
+                    emsg.setWindowTitle("Tiny-PyRPG | Error: Command Invalid")
+                    emsg.showMessage("Error: the action you just tried to do is broken. Please contact the developer.")
+                    continue
+                self.parent.window._update_players(game)
+                print("Lobby Refreshed")
+            
+################### End Turn  #######################
+            elif command == "END TURN":
+                pass
+
+
 
 class Client:
     def __init__(self):
+        self.signal = MySignal()
+        self.signal.sig_no_args.connect(self.go_to_game)
         self.app = QApplication(sys.argv)
         self.window = MainMenu(self)
         self.window.show()
         self.app.exec_()
+
 
     def go_to_main_menu(self):
         self.window.hide()
