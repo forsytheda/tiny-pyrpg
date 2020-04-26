@@ -1,6 +1,6 @@
 {
     "TPR-Type": "action",
-    "name": "Basic Defend",
+    "name": "basic_defend",
     "costs": 
     {
         "ap": 2,

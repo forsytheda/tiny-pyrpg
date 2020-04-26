@@ -1,6 +1,6 @@
 {
     "TPR-Type": "action",
-    "name": "Basic Attack",
+    "name": "basic_attack",
     "costs": 
     {
         "ap": 3,

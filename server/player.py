@@ -34,7 +34,9 @@ class Player:
             change = modifier.change
             duration = status.duration
             duration_delta = status.duration_delta
-            self.attributes[attribute] -= change
+            self.attributes[attribute] = self.attributes[attribute] - change
+            if self.attributes[attribute] < 0:
+                self.attributes[attribute] = 0
             duration -= 1
             change -= duration_delta
             if change < 0:

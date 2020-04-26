@@ -110,7 +110,9 @@ class Game:
         for modifier in modifiers:
             attribute = modifier.attribute
             change = modifier.change
-            target[attribute] -= change
+            target.attributes[attribute] -= change
+        source.attributes["ap"] -= ap_cost
+        source.attributes["mana"] -= mana_cost
         target.statuses.extend(statuses)
         if target.attributes["hp"] <= 0:
             target.is_alive = False

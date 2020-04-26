@@ -17,6 +17,7 @@ def send_client_error(conn, msg):
     spkg = {}
     spkg["response"] = "ERROR"
     spkg["data"] = msg
+    print(json.dumps(spkg, indent=4))
     spkg = json.dumps(spkg).encode()
     conn.sendall(spkg)
 
@@ -138,6 +139,7 @@ def client_do_action(conn, name, game, data, status):
     else:
         action = data["action"]
         target = data["target"]
+        target = int(target)
         # Try to have them perform the action.
         result = game.try_action(name, target, action)
         # If they don't have enough AP, tell them such.
@@ -219,7 +221,7 @@ def process_game_request(conn, name, game):
     if request not in valid_commands:
         print("CLIENT: {} sent an invalid request.".format(name))
         send_client_error(conn, "INVALID REQUEST")
-        
+
     return True
 
 def client_thread(conn, name, game):
