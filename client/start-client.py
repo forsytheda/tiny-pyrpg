@@ -171,18 +171,20 @@ class GameMenu(QMainWindow):
         self.parent = parent
         self.ui = Ui_TPRGameMenu()
         self.ui.setupUi(self)
+        self.action = {}
         self.target = "P1"
+        self.targetNum = 1
         #Button name is odd should be refresh i guess
         self.ui.btn_action_info.clicked.connect(self.refresh)
         self.ui.btn_end_turn.clicked.connect(self.endTurn)
-        self.ui.btn_do_selected_action.clicked.connect(self.action)
+        self.ui.btn_do_selected_action.clicked.connect(self.doAction)
         self.ui.btn_p1_select.clicked.connect(self.p1Select)
         self.ui.btn_p2_select.clicked.connect(self.p2Select)
         self.ui.btn_p3_select.clicked.connect(self.p3Select)
         self.ui.btn_p4_select.clicked.connect(self.p4Select)
         self.ui.btn_p5_select.clicked.connect(self.p5Select)
         self.ui.btn_p6_select.clicked.connect(self.p6Select)
-        self.ui.list_actions.itemClicked.connect(self.actionSelect)
+        #self.ui.list_actions.itemClicked.connect(self.actionSelect)
 
 
     
@@ -249,26 +251,40 @@ class GameMenu(QMainWindow):
         self.parent.command_queue.put("GET UPDATE")
     def endTurn(self):
         self.parent.command_queue.put("END TURN")
-    def action(self):
-        self.parent.command_queue.put("DO ACTION")
+    def doAction(self):
+        selectedAction = self.ui.list_actions.selectedItems()
+        print(selectedAction[0].text())
+        if selectedAction ==  []:
+            pass #Send message to select an action
+        else:
+            tempAction = str(selectedAction[0].text())
+            self.action["action"] = tempAction
+            self.action["target"] = self.targetNum
+            self.parent.command_queue.put("DO ACTION")
     def p1Select(self):
         self.target = "P1"
-        self.iu.lbl_selected_target.setText(self.target)
+        self.targetNum = 1
+        self.ui.lbl_selected_target.setText(self.target)
     def p2Select(self):
         self.target = "P2"
-        self.iu.lbl_selected_target.setText(self.target)
+        self.targetNum = 2
+        self.ui.lbl_selected_target.setText(self.target)
     def p3Select(self):
         self.target = "P3"
-        self.iu.lbl_selected_target.setText(self.target)
+        self.targetNum = 3
+        self.ui.lbl_selected_target.setText(self.target)
     def p4Select(self):
         self.target = "P4"
-        self.iu.lbl_selected_target.setText(self.target)
+        self.targetNum = 4
+        self.ui.lbl_selected_target.setText(self.target)
     def p5Select(self):
         self.target = "P5"
-        self.iu.lbl_selected_target.setText(self.target)
+        self.targetNum = 5
+        self.ui.lbl_selected_target.setText(self.target)
     def p6Select(self):
         self.target = "P6"
-        self.iu.lbl_selected_target.setText(self.target)
+        self.targetNum = 6
+        self.ui.lbl_selected_target.setText(self.target)
     def actionSelect(self):
         pass
 
@@ -489,7 +505,8 @@ class ClientSocket:
                 #action = self.parent.windown.
                 data = {}
                 data["request"] = "DO ACTION"
-                data["data"] = None
+                actionData = self.parent.window.action
+                data["data"] = actionData
                 print(data)
                 data = json.dumps(data).encode()
                 self.sock.sendall(data)
@@ -497,8 +514,13 @@ class ClientSocket:
                 response = json.loads(response.decode())
                 game = response["data"]
                 response = response["response"]
-                if response != "GAME DATA":
-                    emsg = QErrorMessage()
+                if response == "ERROR":
+                    emsg = QErrorMessage(self.parent.window)
+                    emsg.setWindowTitle("Tiny-PyRPG | Error: Out of AP")
+                    emsg.showMessage("Error: Hey guy, You are out of AP.")
+                    continue
+                elif response != "GAME DATA":
+                    emsg = QErrorMessage(self.parent.window)
                     emsg.setWindowTitle("Tiny-PyRPG | Error: Command Invalid")
                     emsg.showMessage("Error: the action you just tried to do is broken. Please contact the developer.")
                     continue
@@ -510,7 +532,6 @@ class ClientSocket:
                 data = {}
                 data["request"] = "GET UPDATE"
                 data["data"] = None
-                print(data)
                 data = json.dumps(data).encode()
                 self.sock.sendall(data)
                 response = self.sock.recv(4096)
@@ -527,7 +548,22 @@ class ClientSocket:
             
 ################### End Turn  #######################
             elif command == "END TURN":
-                pass
+                data = {}
+                data["request"] = "END TURN"
+                data["data"] = None
+                data = json.dumps(data).encode()
+                self.sock.sendall(data)
+                response = self.sock.recv(4096)
+                response = json.loads(response.decode())
+                game = response["data"]
+                response = response["response"]
+                if response != "GAME DATA":
+                    emsg = QErrorMessage()
+                    emsg.setWindowTitle("Tiny-PyRPG | Error: Command Invalid")
+                    emsg.showMessage("Error: the action you just tried to do is broken. Please contact the developer.")
+                    continue
+                self.parent.window._update_players(game)
+                print("Turn Ended")
 
 
 
