@@ -112,10 +112,10 @@ class LobbyMenu(QMainWindow):
 
     def _update_players(self, game):
         lobby = game["lobby"]
-        print(lobby)
+        #print(lobby)
         for player in lobby.keys():
         #for player in lobby["game"].keys():
-            print(player)
+            #print(player)
             labels = self._get_player_labels(player)
             labels["name"].setText(lobby[player]["name"] if not lobby[player]["name"] == "" else "Empty")
             labels["profession"].setText(lobby[player]["profession"] if not lobby[player]["profession"] == "" else "None")
