@@ -36,9 +36,10 @@ def send_client_game(conn, name, response="GAME DATA"):
     spkg = {}
     spkg["response"] = response
     data = {}
-    pnum = game.get_player_number(name) + 1
-    data["player-number"] = pnum
-    data["game"] = game.get_game_dict()
+    data["actions"] = game.get_player_actions(name)
+    game_dict = game.get_game_dict()
+    game_dict["player-number"] = game.get_player_number(name) + 1
+    data["game"] = game_dict
     spkg["data"] = data
     spkg = dumps(spkg).encode()
     conn.sendall(spkg)
@@ -54,72 +55,102 @@ def send_client_end_game(conn, won="YOU LOSE"):
 def client_thread(conn, name):
     global game
     print("CLIENT: Starting client thread for {}.".format(name))
-    while game.in_lobby:
+    while True:
         cpkg = loads(conn.recv(4096).decode())
         if game.in_game:
-            send_client_error(conn, "GAME STARTED")
+            print("CLIENT: {} was in lobby when a game was already running.".format(name))
+            send_client_game(conn, name)
             break
         request = cpkg["request"]
         data = cpkg["data"]
         if request == "GET UPDATE":
+            print("CLIENT: {} is getting an updated lobby.".format(name))
             send_client_lobby(conn, name)
         elif request == "UPDATE PROFESSION":
             print("CLIENT: Updating {}'s profession to {}.".format(name, data))
             game.set_player_profession(name, data)
+            print("CLIENT: {} is getting an updated lobby.".format(name))
             send_client_lobby(conn, name)
         elif request == "UPDATE READY":
+            print("CLIENT: Updating {}'s ready state to {}.".format(name, data))
             game.set_player_ready(name, data)
+            print("CLIENT: {} is getting an updated lobby.".format(name))
             send_client_lobby(conn, name)
         elif request == "TRY START":
+            print("CLIENT: {} is trying to start the game.".format(name))
             if game.try_start():
+                print("CLIENT: all players were ready and {} started the game.".format(name))
                 send_client_game(conn, name, "GAME START")
                 break
             else:
-                send_client_error(conn, "PLAYERS NOT READY")
+                print("CLIENT: {} tried to start the game but not all players were ready.".format(name))
+                send_client_lobby(conn, name)
         elif request == "EXIT":
+            print("CLIENT: {} is exiting the lobby.".format(name))
             game.remove_player(name)
             conn.shutdown(SHUT_RDWR)
             conn.close()
+            return
         else:
+            print("CLIENT: {} send an invalid request.".format(name))
             send_client_error(conn, "INVALID REQUEST")
 
-    while game.in_game:
+    print("CLIENT: {} has entered the game sequence.".format(name))
+    while True:
         cpkg = loads(conn.recv(4096).decode())
         if not game.in_game:
+            print("CLIENT: {} was in game but the game has ended.")
+            send_client_end_game(conn)
+            conn.shutdown(SHUT_RDWR)
+            conn.close()
             break
         request == cpkg["request"]
         data = cpkg["data"]
         status = game.get_player_status(name)
         if status == -1:
+            print("CLIENT: {} is dead and leaving the game.".format(name))
             send_client_end_game(conn, name)
             conn.shutdown(SHUT_RDWR)
             conn.close()
             return
         if request == "GET UPDATE":
+            print("CLIENT: {} is getting an updated game.".format(name))
             send_client_game(conn, name)
         elif request == "DO ACTION":
+            print("CLIENT: {} is trying to perform the {} action.".format(name, data["action"]))
             if status == -2:
+                print("CLIENT: it is not {}'s turn.".format(name))
                 send_client_error(conn, "NOT PLAYER TURN")
             else:
                 action = data["action"]
                 target = data["target"]
                 result = game.try_action(name, target, action)
                 if result == -1:
+                    print("CLIENT: {} did not have enough AP to perform this action.".format(name))
                     send_client_error(conn, "NOT ENOUGH AP")
                 elif result == -2:
+                    print("CLIENT: {} did not have enough mana to perform this action.".format(name))
                     send_client_error(conn, "NOT ENOUGH MANA")
                 else:
+                    print("CLIENT: {} performed the action.".format(name))
+                    print("CLIENT: {} is getting an updated game.".format(name))
                     send_client_game(conn, name)
         elif request == "END TURN":
+            print("CLIENT: {} is trying to end their turn.".format(name))
             if status == -1:
+                print("CLIENT: it is not {}'s turn.".format(name))
                 send_client_error(conn, "NOT PLAYER TURN")
             else:
+                print("CLIENT: cycling turns.")
                 result = game.cycle_turn()
                 if result == 0:
+                    print("CLIENT: {} is getting an updated game.".format(name))
                     send_client_game(conn, name)
                 elif result == -1:
+                    print("CLIENT: {} won the game!".format(name))
                     send_client_end_game(conn, "YOU WIN")
         else:
+            print("CLIENT: {} sent an invalid request.".format(name))
             send_client_error(conn, "INVALID REQUEST")  
 
 def start_listener():

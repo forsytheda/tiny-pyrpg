@@ -4,6 +4,7 @@
     {
         "turn-number": 0,
         "player-number": 1,
+        "active-player": 1,
         "players":
         {
             "p1": 

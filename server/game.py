@@ -56,6 +56,13 @@ class Game:
         self.lock.release()
         return 0
 
+    def get_player_actions(self, name):
+        self.lock.acquire()
+        pnum = self.get_player_number(name)
+        actions = self.players[pnum].profession.actions
+        self.lock.release()
+        return actions
+
     def set_player_profession(self, name, profession):
         self.lock.acquire()
         pnum = self.get_player_number(name)
@@ -104,6 +111,8 @@ class Game:
             change = modifier.change
             target[attribute] -= change
         target.statuses.extend(statuses)
+        if target.attributes["hp"] <= 0:
+            target.is_alive = False
         self.lock.release()
         return 0
 
@@ -172,36 +181,40 @@ class Game:
     def get_game_dict(self):
         self.lock.acquire()
         game_dict = {}
+        player_dict = {}
+        game_dict["turn-number"] = self.turn_number
+        game_dict["active-player"] = self.active_player + 1
+        game_dict["players"] = player_dict
 
         if len(self.players) >= 1:
-            game_dict["p1"] = self.players[0].lobby_dict()
+            player_dict["p1"] = self.players[0].game_dict()
         else:
-            game_dict["p1"] = get_empty_game_dict()
+            player_dict["p1"] = get_empty_game_dict()
 
         if len(self.players) >= 2:
-            game_dict["p2"] = self.players[1].lobby_dict()
+            player_dict["p2"] = self.players[1].game_dict()
         else:
-            game_dict["p2"] = get_empty_game_dict()
+            player_dict["p2"] = get_empty_game_dict()
 
         if len(self.players) >= 3:
-            game_dict["p3"] = self.players[2].lobby_dict()
+            player_dict["p3"] = self.players[2].game_dict()
         else:
-            game_dict["p3"] = get_empty_game_dict()
+            player_dict["p3"] = get_empty_game_dict()
 
         if len(self.players) >= 4:
-            game_dict["p4"] = self.players[3].lobby_dict()
+            player_dict["p4"] = self.players[3].game_dict()
         else:
-            game_dict["p4"] = get_empty_game_dict()
+            player_dict["p4"] = get_empty_game_dict()
 
         if len(self.players) >= 5:
-            game_dict["p5"] = self.players[4].lobby_dict()
+            player_dict["p5"] = self.players[4].game_dict()
         else:
-            game_dict["p5"] = get_empty_game_dict()
+            player_dict["p5"] = get_empty_game_dict()
 
         if len(self.players) >= 6:
-            game_dict["p6"] = self.players[5].lobby_dict()
+            player_dict["p6"] = self.players[5].game_dict()
         else:
-            game_dict["p6"] = get_empty_game_dict()
+            player_dict["p6"] = get_empty_game_dict()
 
         self.lock.release()
         return game_dict

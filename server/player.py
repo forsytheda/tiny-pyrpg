@@ -1,5 +1,6 @@
 from copy import deepcopy
 from profession import PROFESSION_LIST
+import json
 
 class Player:
 
@@ -9,10 +10,17 @@ class Player:
         self.attributes = None
         self.ready = False
         self.statuses = []
+        self.is_alive = True
 
     def set_profession(self, profession):
         self.profession = PROFESSION_LIST[profession]
-        self.attributes = deepcopy(self.profession.base_attributes)
+        self.attributes = {}
+        self.attributes["hp"] = 0 + self.profession.base_attributes["base_hp"]
+        self.attributes["max_hp"] = 0 + self.profession.base_attributes["base_hp"]
+        self.attributes["ap"] = 0 + self.profession.base_attributes["base_ap"]
+        self.attributes["max_ap"] = 0 + self.profession.base_attributes["base_ap"]
+        self.attributes["mana"] = 0 + self.profession.base_attributes["base_mana"]
+        self.attributes["max_mana"] = 0 + self.profession.base_attributes["base_mana"]
 
     def set_ready(self, ready):
         self.ready = ready
@@ -31,6 +39,8 @@ class Player:
                 change = 0
             if duration == 0:
                 self.statuses.remove(status)
+        if self.attributes["hp"] <= 0:
+            self.is_alive = False
 
     def lobby_dict(self):
         lobby_dict = {}
