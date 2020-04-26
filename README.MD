@@ -9,10 +9,12 @@ Client:
 
 start_client.exe
 
-./start_client.sh
+./start_client
 
 Server:
 
 start_server.exe
 
-./start_server.sh
+./start_server
+
+WARNING: Linux users may have visual glitches depending on their distribution and desktop environment.

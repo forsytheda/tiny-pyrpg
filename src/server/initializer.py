@@ -4,8 +4,8 @@ from os import getcwd, listdir
 from action import ACTION_LIST, Action, Modifier, Status
 from profession import PROFESSION_LIST, Profession
 
-PROFESSION_BASE_PATH = "\\assets\\professions\\"
-ACTION_BASE_PATH = "\\assets\\actions\\"
+PROFESSION_BASE_PATH = "/assets/professions/"
+ACTION_BASE_PATH = "/assets/actions/"
 
 def init():
     PROFESSION_LIST.clear()
